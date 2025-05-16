@@ -1,0 +1,109 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2 *ngIf="activeTab === 'login'">Login to VoteApp</h2>
+      <h2 *ngIf="activeTab === 'register'">Register an Account</h2>
+      <p *ngIf="activeTab === 'login'">Enter your credentials to access your account.</p>
+      <p *ngIf="activeTab === 'register'">Create your free account to start voting.</p>
+    </div>
+
+    <div class="tabs">
+      <div class="tab" [class.active]="activeTab === 'login'" (click)="setActiveTab('login')">Login</div>
+      <div class="tab" [class.active]="activeTab === 'register'" (click)="setActiveTab('register')">Register</div>
+    </div>
+
+    <!-- Display messages -->
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+
+    <!-- Login Form -->
+    <form *ngIf="activeTab === 'login'" [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <div class="form-group">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" class="form-control" formControlName="email"
+               [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
+        <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
+          Please enter a valid email.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" class="form-control" formControlName="password"
+               [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
+        <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-message">
+          Password is required.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading" [class.btn-loading]="loading">
+        Login
+      </button>
+    </form>
+
+    <!-- Register Form -->
+    <form *ngIf="activeTab === 'register'" [formGroup]="registerForm" (ngSubmit)="onRegister()">
+      <div class="form-group">
+        <label for="registerName">Name</label>
+        <input id="registerName" type="text" class="form-control" formControlName="name"
+               [class.error]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched" />
+        <div *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched" class="error-message">
+          Name is required (min 3 characters).
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="registerEmail">Email</label>
+        <input id="registerEmail" type="email" class="form-control" formControlName="email"
+               [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" />
+        <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="error-message">
+          Please enter a valid email.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="registerPassword">Password</label>
+        <input id="registerPassword" type="password" class="form-control" formControlName="password"
+               [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" />
+        <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="error-message">
+          Password is required (min 6 characters).
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="registerConfirmPassword">Confirm Password</label>
+        <input id="registerConfirmPassword" type="password" class="form-control" formControlName="confirmPassword"
+               [class.error]="(registerForm.hasError('mismatch') || registerForm.get('confirmPassword')?.invalid) && registerForm.get('confirmPassword')?.touched" />
+        <div *ngIf="registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched" class="error-message">
+          Passwords do not match.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading" [class.btn-loading]="loading">
+        Register
+      </button>
+    </form>
+
+    <div class="form-divider"><span>or</span></div>
+
+    <div class="social-login">
+      <button class="social-btn" aria-label="Login with Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </button>
+      <button class="social-btn" aria-label="Login with Twitter">
+        <i class="fab fa-twitter"></i>
+      </button>
+      <button class="social-btn" aria-label="Login with Google">
+        <i class="fab fa-google"></i>
+      </button>
+    </div>
+
+    <div class="auth-footer" *ngIf="activeTab === 'login'">
+      <p>Don't have an account? <a href="#" (click)="setActiveTab('register'); $event.preventDefault()">Register</a></p>
+    </div>
+
+    <div class="auth-footer" *ngIf="activeTab === 'register'">
+      <p>Already have an account? <a href="#" (click)="setActiveTab('login'); $event.preventDefault()">Login</a></p>
+    </div>
+  </div>
+</div>
