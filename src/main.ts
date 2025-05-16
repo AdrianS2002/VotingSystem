@@ -1,6 +1,29 @@
+// main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+import { provideRouter } from '@angular/router';
+import { importProvidersFrom } from '@angular/core';
+import { Routes } from '@angular/router';
+import { HomeComponent } from './app/home/home.component';
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+// Dummy component for routing targets
+import { Component } from '@angular/core';
+import { AuthComponent } from './app/auth/auth.component';
+@Component({ standalone: true, template: 'Coming soon...' })
+class DummyComponent {}
+
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'auth', component: AuthComponent },
+  { path: 'polls', component: DummyComponent },
+  { path: 'polls/:id', component: DummyComponent },
+  { path: 'polls/:id/results', component: DummyComponent },
+  { path: 'polls/create', component: DummyComponent },
+  { path: 'about', component: DummyComponent },
+];
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter(routes)
+  ]
+}).catch(err => console.error(err));
