@@ -55,9 +55,6 @@
   transition: var(--transition);
 }
 
-.form-control {
-  max-width: 400px; /* or whatever max you want */
-}
 
 
 .form-control:focus {
