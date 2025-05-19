@@ -1,0 +1,40 @@
+    <h2>Creează un sondaj</h2>
+    <form (ngSubmit)="createPoll()">
+      <label>Subiect:</label>
+      <input [(ngModel)]="poll.subject" name="subject" required>
+
+      <label>Opțiuni:</label>
+      <div *ngFor="let option of poll.options; let i = index">
+        <input [(ngModel)]="option.text" [name]="'option' + i" required>
+        <button type="button" (click)="removeOption(i)">X</button>
+      </div>
+      <button type="button" (click)="addOption()">Adaugă opțiune</button>
+
+      <label>Vizibilitate:</label>
+      <select [(ngModel)]="poll.visibility" name="visibility">
+        <option value="public">Public</option>
+        <option value="registered">Utilizatori înregistrați</option>
+        <option value="private">Anumite persoane</option>
+      </select>
+
+      <div *ngIf="poll.visibility === 'private'">
+        <label>Emailuri votanți (separate prin virgulă):</label>
+        <input [(ngModel)]="voterEmails" name="voterEmails">
+      </div>
+
+      <label>Reguli afișare rezultate:</label>
+      <select [(ngModel)]="poll.resultsVisibility" name="resultsVisibility">
+        <option value="live">Live</option>
+        <option value="after100Votes">După 100 voturi</option>
+        <option value="afterExpiration">După expirare</option>
+        <option value="afterAllVoted">După ce toți au votat</option>
+      </select>
+
+      <label>Dată publicare:</label>
+      <input type="datetime-local" [(ngModel)]="poll.publishDate" name="publishDate">
+
+      <label>Dată expirare:</label>
+      <input type="datetime-local" [(ngModel)]="poll.expiresAt" name="expiresAt">
+
+      <button type="submit">Creează sondaj</button>
+    </form>
