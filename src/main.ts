@@ -1,29 +1,35 @@
-// main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { provideRouter } from '@angular/router';
-import { importProvidersFrom } from '@angular/core';
-import { Routes } from '@angular/router';
-import { HomeComponent } from './app/home/home.component';
-
-// Dummy component for routing targets
+import { provideHttpClient } from '@angular/common/http';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Component } from '@angular/core';
-import { AuthComponent } from './app/auth/auth.component';
-@Component({ standalone: true, template: 'Coming soon...' })
-class DummyComponent {}
+import { routes } from './app/app.routes';
 
-const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'auth', component: AuthComponent },
-  { path: 'polls', component: DummyComponent },
-  { path: 'polls/:id', component: DummyComponent },
-  { path: 'polls/:id/results', component: DummyComponent },
-  { path: 'polls/create', component: DummyComponent },
-  { path: 'about', component: DummyComponent },
-];
 
+const firebaseConfig = {
+  apiKey: "AIzaSyCLI336dPkrEf59kKjqXRzApc_8II-cbME",
+  authDomain: "votingsystem-f94a1.firebaseapp.com",
+  projectId: "votingsystem-f94a1",
+  storageBucket: "votingsystem-f94a1.firebasestorage.app",
+  messagingSenderId: "857406504881",
+  appId: "1:857406504881:web:3ba4dad8181a52481ec790",
+  measurementId: "G-45CBTXR6Y4"
+
+};
+
+console.log("dsadasd",routes)
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(routes)
+    provideHttpClient(),
+    provideRouter(routes),
+    
+    provideFirebaseApp(() => initializeApp(firebaseConfig)),
+    provideFirestore(() => getFirestore()),
+    provideAuth(() => getAuth()), 
+    provideAnimationsAsync(),
   ]
-}).catch(err => console.error(err));
+}).catch(err => console.error(err)); 
