@@ -34,7 +34,6 @@ export class PollCreateComponent implements OnInit {
     this.addOption();
     this.addOption();
     
-    // Set expiration date to 7 days from now by default
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);
     this.poll.expiresAt = expiryDate;
@@ -45,14 +44,12 @@ export class PollCreateComponent implements OnInit {
   }
 
   removeOption(index: number) {
-    // Prevent removing if there are only 2 options left
     if (this.poll.options.length > 2) {
       this.poll.options.splice(index, 1);
     }
   }
 
   createPoll() {
-    // Validate required fields
     if (!this.poll.subject.trim()) {
       alert('Please provide a poll subject');
       return;

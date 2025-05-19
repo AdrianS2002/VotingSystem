@@ -45,7 +45,6 @@ export class PollDetailsComponent implements OnInit {
       votedAt: new Date()
     });
 
-    // incrementare contor voturi total
     const pollRef = doc(this.firestore, `polls/${this.pollId}`);
     await setDoc(pollRef, { totalVotes: (this.poll.totalVotes || 0) + 1 }, { merge: true });
 
@@ -53,7 +52,6 @@ export class PollDetailsComponent implements OnInit {
   }
 
 private async getVoterId(): Promise<string> {
-  // Check for authenticated user first
   const user = this.auth.currentUser;
   if (user && user.uid) return user.uid;
   
