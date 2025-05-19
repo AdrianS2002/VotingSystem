@@ -1,0 +1,13 @@
+    <ng-container *ngIf="poll">
+      <h2>{{ poll.subject }}</h2>
+
+      <form *ngIf="!hasVoted" (ngSubmit)="submitVote()">
+        <label *ngFor="let option of poll.options">
+          <input type="radio" name="vote" [value]="option.id" [(ngModel)]="selectedOption" required>
+          {{ option.text }}
+        </label>
+        <button type="submit">Votează</button>
+      </form>
+
+      <p *ngIf="hasVoted">Ai votat deja pentru acest sondaj.</p>
+    </ng-container>
