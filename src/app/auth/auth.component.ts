@@ -1,13 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { catchError, of } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-auth',
+  standalone: true,
+  imports: [FormsModule, CommonModule, ReactiveFormsModule],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css'],
-  standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule]
+  
 })
 export class AuthComponent {
   activeTab: 'login' | 'register' = 'login';
@@ -19,7 +22,7 @@ export class AuthComponent {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private authService: AuthService) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
@@ -50,29 +53,45 @@ export class AuthComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    // Simulate API call
-    setTimeout(() => {
-      this.loading = false;
-      if (this.loginForm.value.email === 'user@example.com' && this.loginForm.value.password === 'password') {
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email, password).pipe(
+      catchError(err => {
+        this.errorMessage = err.message || 'Login failed.';
+        this.loading = false;
+        return of(null);
+      })
+    ).subscribe((res: any) => {
+      if (res) {
         this.successMessage = 'Login successful!';
-      } else {
-        this.errorMessage = 'Invalid email or password.';
+        this.loginForm.reset();
       }
-    }, 1500);
+      this.loading = false;
+    });
   }
 
   onRegister() {
     if (this.registerForm.invalid) return;
+
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    // Simulate API call
-    setTimeout(() => {
+    const {name, email, password } = this.registerForm.value;
+
+    this.authService.signup(name,email, password).pipe(
+      catchError(err => {
+        this.errorMessage = err.message || 'Registration failed.';
+        this.loading = false;
+        return of(null);
+      })
+    ).subscribe((res: any) => {
+      if (res) {
+        this.successMessage = 'Registration successful! Please verify your email.';
+        this.registerForm.reset();
+        this.setActiveTab('login');
+      }
       this.loading = false;
-      this.successMessage = 'Registration successful! You can now login.';
-      this.registerForm.reset();
-      this.setActiveTab('login');
-    }, 1500);
+    });
   }
 }
