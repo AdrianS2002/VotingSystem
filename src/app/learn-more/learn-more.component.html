@@ -1,0 +1,117 @@
+
+<div class="learn-more-page">
+  <header class="page-header">
+    <div class="container">
+      <div class="header-content">
+        <h1>Learn More About Our Platform</h1>
+        <p>Discover how our secure voting system can transform your decision-making process</p>
+        <div class="cta-buttons">
+          <a href="/register" class="btn btn-primary">Get Started</a>
+          <a href="/demo" class="btn btn-outline">Request Demo</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="features-section">
+    <div class="container">
+      <h2 class="section-title">Platform Features</h2>
+      <p class="section-subtitle">Everything you need for successful community voting</p>
+      
+      <div class="features-grid">
+        <div class="feature-card" *ngFor="let feature of features">
+          <div class="feature-icon">
+            <i class="fas {{feature.icon}}"></i>
+          </div>
+          <h3 class="feature-title">{{feature.title}}</h3>
+          <p class="feature-description">{{feature.description}}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ <div class="decorative-delimiter"></div>
+
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">Simple process, powerful results</p>
+      
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Create Your Vote</h3>
+          <p>Set up your question, options, and voting period with our intuitive form builder.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3 class="step-title">Invite Participants</h3>
+          <p>Share the unique voting link via email, social media, or embed it on your website.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Collect Responses</h3>
+          <p>Watch real-time as votes come in and track participation metrics.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3 class="step-title">Analyze Results</h3>
+          <p>Review comprehensive analytics and export data in your preferred format.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="decorative-delimiter"></div>
+
+  <section class="testimonials-section">
+    <div class="container">
+      <h2 class="section-title">What Our Users Say</h2>
+      <p class="section-subtitle">Success stories from organizations like yours</p>
+      
+      <div class="testimonials-carousel">
+        <div class="testimonial-card" *ngFor="let testimonial of testimonials">
+          <div class="quote-mark">
+            <i class="fas fa-quote-left"></i>
+          </div>
+          <p class="testimonial-quote">{{testimonial.quote}}</p>
+          <div class="testimonial-author">
+            <p class="author-name">{{testimonial.author}}</p>
+            <p class="author-organization">{{testimonial.organization}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+<div class="decorative-delimiter"></div>
+  <section class="faq-section">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-subtitle">Find answers to common questions about our platform</p>
+      
+      <div class="faq-list">
+        <div class="faq-item" *ngFor="let faq of faqs; let i = index">
+          <div class="faq-question" [attr.data-toggle]="'faq-' + i">
+            <h3>{{faq.question}}</h3>
+            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+          </div>
+          <div class="faq-answer" id="{{'faq-' + i}}">
+            <p>{{faq.answer}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+<div class="decorative-delimiter"></div>
+  <section class="call-to-action">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Ready to transform your voting process?</h2>
+        <p>Join thousands of organizations making better decisions with our platform.</p>
+        <div class="cta-buttons">
+          <a href="/register" class="btn btn-primary">Create Free Account</a>
+          <a href="/pricing" class="btn btn-outline">View Pricing Plans</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

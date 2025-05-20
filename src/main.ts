@@ -9,6 +9,7 @@ import { HomeComponent } from './app/home/home.component';
 // Dummy component for routing targets
 import { Component } from '@angular/core';
 import { AuthComponent } from './app/auth/auth.component';
+import { LearnMoreComponent } from './app/learn-more/learn-more.component';
 @Component({ standalone: true, template: 'Coming soon...' })
 class DummyComponent {}
 
@@ -19,7 +20,7 @@ const routes: Routes = [
   { path: 'polls/:id', component: DummyComponent },
   { path: 'polls/:id/results', component: DummyComponent },
   { path: 'polls/create', component: DummyComponent },
-  { path: 'about', component: DummyComponent },
+  { path: 'about', component: LearnMoreComponent },
 ];
 
 bootstrapApplication(AppComponent, {
