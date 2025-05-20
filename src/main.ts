@@ -21,6 +21,7 @@ const firebaseConfig = {
 
 };
 
+
 console.log("dsadasd",routes)
 bootstrapApplication(AppComponent, {
   providers: [
