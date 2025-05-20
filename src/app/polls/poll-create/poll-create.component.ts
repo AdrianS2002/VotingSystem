@@ -4,7 +4,6 @@ import { PollService } from '../../services/poll.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-poll-create',
@@ -39,8 +38,18 @@ export class PollCreateComponent implements OnInit {
     this.poll.expiresAt = expiryDate;
   }
 
+   generateId(): string {
+
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    
+    // Fallback
+    return 'id-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  }
+
   addOption() {
-    this.poll.options.push({ id: uuidv4(), text: '' });
+    this.poll.options.push({ id: this.generateId(), text: '' });
   }
 
   removeOption(index: number) {
