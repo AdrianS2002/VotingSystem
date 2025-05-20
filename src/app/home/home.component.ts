@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 
 interface Poll {
@@ -27,7 +28,7 @@ interface PollOption {
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule]
+  imports: [CommonModule, FormsModule, RouterModule],
 })
 export class HomeComponent implements OnInit {
   username: string = 'Guest';
@@ -36,13 +37,18 @@ export class HomeComponent implements OnInit {
   recentPolls: Poll[] = [];
   popularPolls: Poll[] = [];
   
-  constructor() { }
+  constructor(private authService: AuthService) { }
 
   ngOnInit(): void {
-    // Simulate getting user data from a service
-    this.checkLoginStatus();
+    this.authService.user.subscribe(user => {
+      this.isLoggedIn = !!user;
+      if (user) {
+        this.username = user.email;
+      } else {
+        this.username = 'Guest';
+      }
+    });
     
-    // Load sample polls data
     this.loadSamplePolls();
   }
 
@@ -159,4 +165,5 @@ export class HomeComponent implements OnInit {
     alert(`Vote recorded for Option ${optionId} in Poll ${pollId}`);
     // In a real app, you'd then refresh the polls or update the specific poll
   }
+
 }
