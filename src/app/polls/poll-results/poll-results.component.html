@@ -10,7 +10,7 @@
 
   <div *ngIf="!isLoading && !error && poll" class="results-container">
     <h2>{{ poll.subject }} - Results</h2>
-    
+
     <div class="poll-info">
       <span class="badge" [ngClass]="poll.visibility">{{ poll.visibility }}</span>
       <span class="votes-count">{{ totalVotes }} total votes</span>
@@ -19,12 +19,12 @@
 
     <div class="results-chart">
       <div *ngFor="let option of poll.resultOptions; let i = index" class="result-item">
-        <div class="result-label">
-          <span class="option-text">{{ option.text }}</span>
-          <span class="vote-stats">{{ option.votes }} votes ({{ option.percentage }}%)</span>
-        </div>
         <div class="result-bar-container">
-          <div class="result-bar" [style.width.%]="option.percentage" [style.backgroundColor]="getColorForIndex(i)"></div>
+          <div class="result-bar" [style.width.%]="option.percentage" [style.backgroundColor]="getColorForIndex(i)">
+            <span class="bar-label">
+              {{ option.text }} – {{ option.votes }} votes ({{ option.percentage }}%)
+            </span>
+          </div>
         </div>
       </div>
 
@@ -38,28 +38,9 @@
       <a routerLink="/polls" class="btn btn-outline">All Polls</a>
     </div>
   </div>
+  <div class="chart-block" *ngIf="votedChartData">
+    <h3>Participation Rate</h3>
+    <canvas baseChart [data]="votedChartData" [options]="votedChartOptions" [type]="'pie'">
+    </canvas>
+  </div>
 </div>
-
-<!-- <ng-container *ngIf="poll && chartData">
-      <h2>Rezultate: {{ poll.subject }}</h2>
-
-      <div class="charts">
-        <div class="chart-container">
-          <h3>Distribuție voturi (Pie)</h3>
-          <canvas baseChart 
-            [data]="chartData" 
-            [type]="'pie'" 
-            [options]="chartOptions">
-          </canvas>
-        </div>
-
-        <div class="chart-container">
-          <h3>Distribuție voturi (Bar)</h3>
-          <canvas baseChart 
-            [data]="chartData" 
-            [type]="'bar'" 
-            [options]="chartOptions">
-          </canvas>
-        </div>
-      </div>
-    </ng-container> -->
