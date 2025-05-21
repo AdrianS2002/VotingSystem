@@ -2,7 +2,8 @@
   <div class="container">
     <div class="hero-content">
       <h1 class="hero-title">Make Your Voice Heard</h1>
-      <p class="hero-subtitle">Welcome{{isLoggedIn ? ', ' + username : ''}} to VoteNow - a modern platform for secure and transparent voting.</p>
+      <p class="hero-subtitle">Welcome{{isLoggedIn ? ', ' + username : ''}} to VoteNow - a modern platform for secure
+        and transparent voting.</p>
       <div class="hero-actions">
         <a *ngIf="!isLoggedIn" routerLink="/auth" class="btn btn-primary">Get Started</a>
         <a *ngIf="isLoggedIn" routerLink="/polls" class="btn btn-primary">View All Polls</a>
@@ -13,33 +14,37 @@
 </div>
 
 <div class="container main-content">
+  @if(!isLoggedIn)
+  {
+
   <!-- Featured Polls Section -->
   <section class="polls-section">
     <div class="section-header">
       <h2 class="section-title">Featured Polls</h2>
       <a routerLink="/polls" class="section-link">View All</a>
     </div>
-    
+
     <div class="polls-grid">
       <div class="vote-card" *ngFor="let poll of featuredPolls">
         <div class="vote-header">
           <h3 class="vote-title">{{ poll.title }}</h3>
-          <span class="vote-status" [ngClass]="{'status-active': poll.status === 'active', 'status-ended': poll.status === 'ended'}">
+          <span class="vote-status"
+            [ngClass]="{'status-active': poll.status === 'active', 'status-ended': poll.status === 'ended'}">
             {{ poll.status === 'active' ? 'Active' : 'Ended' }}
           </span>
         </div>
-        
+
         <p class="vote-description">{{ poll.description }}</p>
-        
+
         <div class="vote-info">
           <div class="vote-info-item">
             <i class="fas fa-users"></i> {{ poll.totalVotes }} Votes
           </div>
           <div class="vote-info-item">
-            <i class="fas fa-calendar-alt"></i> Ends {{ poll.endDate | date:'mediumDate' }}
+            <i class="fas fa-calendar-alt"></i> Ends {{ poll.expiresAttr | date:'mediumDate' }}
           </div>
         </div>
-        
+
         <div class="vote-results">
           <div *ngFor="let option of poll.options" class="result-item">
             <div class="result-bar">
@@ -49,7 +54,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="vote-actions">
           <a [routerLink]="['/polls', poll.id]" class="btn btn-primary">Vote Now</a>
           <a [routerLink]="['/polls', poll.id, 'results']" class="btn btn-outline">See Details</a>
@@ -91,7 +96,7 @@
       </div>
     </div>
   </section>
-  
+
   <!-- Recent and Popular Polls -->
   <div class="polls-columns">
     <!-- Recent Polls -->
@@ -100,55 +105,57 @@
         <h2 class="section-title">Recent Polls</h2>
         <a routerLink="/polls" class="section-link">More</a>
       </div>
-      
+
       <div class="polls-list">
         <div class="vote-card compact" *ngFor="let poll of recentPolls">
           <div class="vote-header">
             <h3 class="vote-title">{{ poll.title }}</h3>
-            <span class="vote-status" [ngClass]="{'status-active': poll.status === 'active', 'status-ended': poll.status === 'ended'}">
+            <span class="vote-status"
+              [ngClass]="{'status-active': poll.status === 'active', 'status-ended': poll.status === 'ended'}">
               {{ poll.status === 'active' ? 'Active' : 'Ended' }}
             </span>
           </div>
-          
+
           <p class="vote-description">{{ poll.description }}</p>
-          
+
           <div class="vote-info">
             <div class="vote-info-item">
               <i class="fas fa-users"></i> {{ poll.totalVotes }} Votes
             </div>
           </div>
-          
+
           <div class="vote-actions">
             <a [routerLink]="['/polls', poll.id]" class="btn btn-primary">Vote</a>
           </div>
         </div>
       </div>
     </section>
-    
+
     <!-- Popular Polls -->
     <section class="polls-section">
       <div class="section-header">
         <h2 class="section-title">Popular Polls</h2>
         <a routerLink="/polls" class="section-link">More</a>
       </div>
-      
+
       <div class="polls-list">
         <div class="vote-card compact" *ngFor="let poll of popularPolls">
           <div class="vote-header">
             <h3 class="vote-title">{{ poll.title }}</h3>
-            <span class="vote-status" [ngClass]="{'status-active': poll.status === 'active', 'status-ended': poll.status === 'ended'}">
+            <span class="vote-status"
+              [ngClass]="{'status-active': poll.status === 'active', 'status-ended': poll.status === 'ended'}">
               {{ poll.status === 'active' ? 'Active' : 'Ended' }}
             </span>
           </div>
-          
+
           <p class="vote-description">{{ poll.description }}</p>
-          
+
           <div class="vote-info">
             <div class="vote-info-item">
               <i class="fas fa-users"></i> {{ poll.totalVotes }} Votes
             </div>
           </div>
-          
+
           <div class="vote-actions">
             <a [routerLink]="['/polls', poll.id]" class="btn btn-primary">Vote</a>
           </div>
@@ -156,12 +163,55 @@
       </div>
     </section>
   </div>
-  
+  }
+  @else {
+
+  <section class="polls-section">
+    <div class="section-header">
+      <h2 class="section-title">Polls for You</h2>
+    </div>
+
+    <div class="polls-grid">
+      <div class="vote-card" *ngFor="let poll of visiblePolls" [ngClass]="{ 'disabled-card': poll.isExpired }">
+        <div class="vote-header">
+          <h3 class="vote-title">{{ poll.subject }}</h3>
+          <span class="vote-status">{{ poll.isExpired ? 'Expired' : 'Active' }}</span>
+        </div>
+
+        <p class="vote-description">Total votes: {{ poll.totalVotes }}</p>
+
+        <div class="vote-info">
+          <div class="vote-info-item">
+            <i class="fas fa-calendar-alt"></i>
+            Ends {{ poll.expiresAt | date:'mediumDate' }}
+          </div>
+        </div>
+
+        <div class="vote-actions">
+          <a [routerLink]="['/polls', poll.id]" class="btn btn-primary"
+            [class.disabled]="poll.isExpired || poll.hasVoted" [attr.aria-disabled]="poll.isExpired || poll.hasVoted"
+            [style.pointer-events]="poll.isExpired || poll.hasVoted ? 'none' : 'auto'">
+            {{ poll.hasVoted ? 'Already Voted' : 'Vote' }}
+          </a>
+
+
+          <a [routerLink]="['/polls', poll.id, 'results']" class="btn-results">
+            See Results
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  }
+
   <!-- Call to Action -->
   <section class="cta-section">
     <div class="cta-content">
       <h2 class="cta-title">Create Your Own Poll</h2>
-      <p class="cta-text">Have a question you want to ask the community? Create your own poll and get instant feedback.</p>
+      <p class="cta-text">Have a question you want to ask the community? Create your own poll and get instant feedback.
+      </p>
       <a routerLink="/polls/create" class="btn btn-primary btn-lg">Create Poll</a>
     </div>
   </section>

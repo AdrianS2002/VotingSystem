@@ -64,6 +64,21 @@
   transition: var(--transition);
 }
 
+.btn-results {
+  background-color: transparent;
+  border: 2px solid var(--light-text);
+  color: var(--primary-dark);
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
 .btn-outline:hover {
   background-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
@@ -238,6 +253,15 @@
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.disabled-card {
+  opacity: 0.6;
+}
+
+.disabled-card .btn-primary {
+  pointer-events: none;
+  opacity: 0.4;
 }
 
 /* Responsive Adjustments */

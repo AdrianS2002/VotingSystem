@@ -118,4 +118,13 @@ export class PollService {
     const pollDocRef = doc(this.firestore, `polls/${id}`);
     return from(deleteDoc(pollDocRef));
   }
+
+  async hasUserVoted(pollId: string, userId: string): Promise<boolean> {
+  const votesRef = collection(this.firestore, 'votes');
+  const q = query(votesRef, where('pollId', '==', pollId), where('userId', '==', userId));
+  const snapshot = await getDocs(q);
+  return !snapshot.empty;
+}
+
+
 }
