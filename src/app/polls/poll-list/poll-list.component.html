@@ -1,32 +1,99 @@
 <div class="container">
-      <h2>Polls</h2>
-      
-      <div class="create-new">
-        <a routerLink="/polls/create" class="btn btn-primary">Create New Poll</a>
+  <h2>Polls</h2>
+  
+  <!-- Add filters, search, and create button -->
+  <div class="create-new">
+    <!-- Search and filters -->
+    <div class="filters">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          placeholder="Search polls..." 
+          [(ngModel)]="searchTerm" 
+          (keyup.enter)="onSearch()" />
       </div>
       
-      <div *ngIf="isLoading" class="loading">
-        Loading polls...
-      </div>
-      
-      <div *ngIf="error" class="error-message">
-        {{ error }}
-        <button (click)="loadPolls()" class="btn btn-sm btn-retry">Retry</button>
-      </div>
-      
-      <div *ngIf="!isLoading && !error && polls.length === 0" class="no-polls">
-        No polls found. Create your first poll!
-      </div>
-      
-      <div *ngIf="!isLoading && polls.length > 0" class="polls-grid">
-        <div *ngFor="let poll of polls" class="poll-card">
-          <h3>{{ poll.subject }}</h3>
-          <p class="badge" [ngClass]="poll.visibility">{{ poll.visibility }}</p>
-          <p>Total votes: {{ poll.totalVotes }}</p>
-          <div class="poll-actions">
-            <a [routerLink]="['/polls', poll.id]" class="btn btn-sm">Vote</a>
-            <a [routerLink]="['/polls', poll.id, 'results']" class="btn btn-sm">Results</a>
-          </div>
-        </div>
+      <div class="filter-group">
+        <label for="status-filter">Status:</label>
+        <select 
+          id="status-filter" 
+          [(ngModel)]="statusFilter" 
+          (change)="onStatusFilterChange()">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="expired">Expired</option>
+        </select>
       </div>
     </div>
+    
+    <!-- Create button -->
+    <a routerLink="/polls/create" class="btn btn-primary">Create New Poll</a>
+  </div>
+  
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading">
+    <p>Loading polls...</p>
+  </div>
+  
+  <!-- Error state -->
+  <div *ngIf="error" class="error-message">
+    <span>{{ error }}</span>
+    <button (click)="loadPolls()" class="btn btn-retry">Retry</button>
+  </div>
+  
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && !error && allPolls.length === 0" class="no-polls">
+    <div class="no-polls-icon">📊</div>
+    <p>No polls found. Create your first poll!</p>
+    <a routerLink="/polls/create" class="btn btn-primary">Create a Poll</a>
+  </div>
+
+  <!-- No results after filtering -->
+  <div *ngIf="!isLoading && !error && allPolls.length > 0 && polls.length === 0" class="no-polls">
+    <div class="no-polls-icon">🔍</div>
+    <p>No polls match your search criteria.</p>
+    <button (click)="searchTerm = ''; statusFilter = 'all'; applyFilters()" class="btn btn-primary">Clear Filters</button>
+  </div>
+  
+  <!-- Poll grid -->
+  <div *ngIf="!isLoading && polls.length > 0" class="polls-grid">
+    <div *ngFor="let poll of polls" class="poll-card">
+      <!-- Status indicator -->
+      <div class="poll-status" [class.expired]="isPollExpired(poll)"></div>
+      
+      <h3>{{ poll.subject }}</h3>
+      <span class="badge" [ngClass]="poll.visibility">{{ poll.visibility }}</span>
+      <p>Total votes: {{ poll.totalVotes }}</p>
+      
+      <!-- Poll info -->
+      <div class="poll-info">
+        <div class="poll-info-item">
+          <span>Created: {{ formatDate(poll.publishDate) }}</span>
+        </div>
+        <div class="poll-info-item">
+          <span>Expires: {{ formatDate(poll.expiresAt) }}</span>
+        </div>
+      </div>
+      
+      <div class="poll-actions">
+        <a [routerLink]="['/polls', poll.id]" class="btn btn-sm">Vote</a>
+        <a [routerLink]="['/polls', poll.id, 'results']" class="btn btn-sm">Results</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add pagination if needed -->
+  <div *ngIf="totalPages > 1" class="pagination">
+    <div class="pagination-item pagination-arrow" [class.disabled]="currentPage === 1" (click)="prevPage()">«</div>
+    
+    <div *ngFor="let page of pageNumbers" 
+         class="pagination-item" 
+         [class.active]="page === currentPage"
+         (click)="setPage(page)">
+      {{ page }}
+    </div>
+    
+    <div class="pagination-item pagination-arrow" [class.disabled]="currentPage === totalPages" (click)="nextPage()">»</div>
+  </div>
+</div>
