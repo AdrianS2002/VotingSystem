@@ -65,6 +65,7 @@ export class AuthComponent {
     ).subscribe((res: any) => {
       if (res) {
         this.successMessage = 'Login successful!';
+        console.log('User logged in successfully ', res);
         this.loginForm.reset();
         setTimeout(() => {
           this.router.navigate(['/']);

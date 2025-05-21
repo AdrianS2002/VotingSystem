@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Firestore, doc, getDoc, setDoc, collection, getDocs } from '@angular/fire/firestore';
-import { Auth } from '@angular/fire/auth';
+import { Firestore, doc, getDoc, setDoc, collection, getDocs, query, where } from '@angular/fire/firestore';
+import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
 import { Poll } from '../../models/poll.model';
+import { VoteService } from '../../services/vote.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-poll-details',
@@ -20,38 +22,40 @@ export class PollDetailsComponent implements OnInit {
   hasVoted: boolean = false;
   isLoading: boolean = true;
   error: string | null = null;
+  userEmail: string = '';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private firestore: Firestore,
-    private auth: Auth
-  ) {}
+    private auth: Auth,
+    private voteService: VoteService,
+    private authService: AuthService
+  ) { }
 
   async ngOnInit() {
     this.isLoading = true;
-    
     try {
       this.pollId = this.route.snapshot.paramMap.get('id') || '';
-      if (!this.pollId) {
-        throw new Error('Poll ID is required');
-      }
+      if (!this.pollId) throw new Error('Poll ID is required');
 
       const pollDoc = await getDoc(doc(this.firestore, `polls/${this.pollId}`));
-      if (!pollDoc.exists()) {
-        throw new Error('Poll not found');
-      }
+      if (!pollDoc.exists()) throw new Error('Poll not found');
 
       this.poll = { id: pollDoc.id, ...pollDoc.data() } as Poll;
-      
+
       const userId = await this.getVoterId();
-      const voteDoc = await getDoc(doc(this.firestore, `polls/${this.pollId}/votes/${userId}`));
-      this.hasVoted = voteDoc.exists();
-      
-      if (this.hasVoted) {
-        this.selectedOption = voteDoc.data()?.['optionId'];
+      const voteQuery = query(
+        collection(this.firestore, 'votes'),
+        where('pollId', '==', this.pollId),
+        where('userId', '==', userId)
+      );
+      const voteSnap = await getDocs(voteQuery);
+      if (!voteSnap.empty) {
+        this.hasVoted = true;
+        this.selectedOption = voteSnap.docs[0].data()['optionId'];
       }
-      
+
     } catch (error) {
       console.error('Error loading poll:', error);
       this.error = 'Failed to load poll details.';
@@ -62,54 +66,72 @@ export class PollDetailsComponent implements OnInit {
 
   async submitVote() {
     if (!this.selectedOption) {
-      alert('Please select an option to vote.');
+      this.error = 'Please select an option to vote.';
       return;
     }
-    
+
     if (!this.poll) {
       this.error = 'Poll data is missing.';
       return;
     }
 
-    this.isLoading = true;
-    
-    try {
-      const userId = await this.getVoterId();
-      const voteRef = doc(this.firestore, `polls/${this.pollId}/votes/${userId}`);
-      await setDoc(voteRef, {
-        optionId: this.selectedOption,
-        votedAt: new Date()
-      });
+    if (this.poll.visibility === 'private' && this.poll.allowedVoters?.length) {
+      const normalizedEmails = this.poll.allowedVoters.map(email => email.trim().toLowerCase());
+      const currentEmail = this.userEmail.trim().toLowerCase();
 
+      console.log('Normalized Emails:', normalizedEmails);
+      console.log('Current Email:', currentEmail);
+
+      if (!normalizedEmails.includes(currentEmail)) {
+        this.error = 'You are not allowed to vote in this private poll.';
+        return;
+      }
+    }
+
+
+    this.isLoading = true;
+
+    try {
+      const selected = this.poll.options.find(opt => opt.id === this.selectedOption);
+      if (!selected) throw new Error('Selected option not found');
+
+      await this.voteService.vote(this.pollId, selected.id, selected.text).toPromise();
       const pollRef = doc(this.firestore, `polls/${this.pollId}`);
-      await setDoc(pollRef, { totalVotes: (this.poll.totalVotes || 0) + 1 }, { merge: true });
+      await setDoc(pollRef, {
+        totalVotes: (this.poll.totalVotes || 0) + 1
+      }, { merge: true });
 
       this.hasVoted = true;
-      
+
       if (this.poll.resultsVisibility === 'live') {
         setTimeout(() => {
           this.router.navigate(['/polls', this.pollId, 'results']);
         }, 1500);
       }
-      
-    } catch (error) {
-      console.error('Error submitting vote:', error);
-      this.error = 'Failed to submit your vote. Please try again.';
+
+    } catch (error: any) {
+      console.error('Vote error:', error);
+      this.error = error.message || 'Failed to submit your vote.';
     } finally {
       this.isLoading = false;
     }
   }
 
   private async getVoterId(): Promise<string> {
-    const user = this.auth.currentUser;
-    if (user && user.uid) return user.uid;
-    
+    const user = this.authService.currentUserProfile;
+
+    if (user && user.uid) {
+      this.userEmail = user.email || '';
+      return user.uid;
+    }
+
     let fingerprint = localStorage.getItem('anonymous-voter-id');
     if (!fingerprint) {
       fingerprint = 'anon-' + crypto.randomUUID();
       localStorage.setItem('anonymous-voter-id', fingerprint);
     }
-    
+
+    this.userEmail = 'anonymous';
     return fingerprint;
   }
 }

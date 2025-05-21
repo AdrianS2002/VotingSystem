@@ -4,6 +4,7 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { DatabaseService } from "./database.service";
 import { User } from "../models/user";
+import { AppUser } from "../models/appUser";
 
 export interface AuthResponseData {
     idToken: string;
@@ -22,6 +23,7 @@ export class AuthService {
     private getUserDataUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${this.apiKey}`;
 
     user = new BehaviorSubject<User | null>(null);
+    currentUserProfile: AppUser | null = null;
 
     constructor(
         private http: HttpClient,
@@ -99,7 +101,11 @@ export class AuthService {
                                 error: { error: { message: 'EMAIL_NOT_VERIFIED' } }
                             }));
                         }
-                        return from(this.databaseService.getUserProfile(resData.localId)).pipe(
+                        return this.databaseService.getUserProfile(resData.localId).pipe(
+                            tap((profile) => {
+                                this.currentUserProfile = profile;
+                                console.log('Loaded user profile:', profile);
+                            }),
                             map(() => resData)
                         );
                     })

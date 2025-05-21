@@ -1,7 +1,7 @@
 <div class="container">
       <h2>Polls</h2>
       
-      <div class="create-new">
+      <div class="create-new" *ngIf="isAdmin">
         <a routerLink="/polls/create" class="btn btn-primary">Create New Poll</a>
       </div>
       
