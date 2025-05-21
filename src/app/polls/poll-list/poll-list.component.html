@@ -1,0 +1,32 @@
+<div class="container">
+      <h2>Polls</h2>
+      
+      <div class="create-new">
+        <a routerLink="/polls/create" class="btn btn-primary">Create New Poll</a>
+      </div>
+      
+      <div *ngIf="isLoading" class="loading">
+        Loading polls...
+      </div>
+      
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+        <button (click)="loadPolls()" class="btn btn-sm btn-retry">Retry</button>
+      </div>
+      
+      <div *ngIf="!isLoading && !error && polls.length === 0" class="no-polls">
+        No polls found. Create your first poll!
+      </div>
+      
+      <div *ngIf="!isLoading && polls.length > 0" class="polls-grid">
+        <div *ngFor="let poll of polls" class="poll-card">
+          <h3>{{ poll.subject }}</h3>
+          <p class="badge" [ngClass]="poll.visibility">{{ poll.visibility }}</p>
+          <p>Total votes: {{ poll.totalVotes }}</p>
+          <div class="poll-actions">
+            <a [routerLink]="['/polls', poll.id]" class="btn btn-sm">Vote</a>
+            <a [routerLink]="['/polls', poll.id, 'results']" class="btn btn-sm">Results</a>
+          </div>
+        </div>
+      </div>
+    </div>

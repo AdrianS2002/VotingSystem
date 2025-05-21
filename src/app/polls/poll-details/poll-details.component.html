@@ -1,0 +1,50 @@
+<div class="container">
+  <div *ngIf="isLoading" class="loading">
+    <p>Loading poll...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+    <button (click)="ngOnInit()" class="btn btn-retry">Try Again</button>
+  </div>
+
+  <div *ngIf="!isLoading && !error && poll" class="poll-container">
+    <h2>{{ poll.subject }}</h2>
+    
+    <div class="poll-info">
+      <span class="badge" [ngClass]="poll.visibility">{{ poll.visibility }}</span>
+      <span class="votes-count">{{ poll.totalVotes }} votes</span>
+      <span class="expiry">Expires: {{ poll.expiresAt | date:'medium' }}</span>
+    </div>
+
+    <form *ngIf="!hasVoted" (ngSubmit)="submitVote()" class="vote-form">
+      <div class="options-list">
+        <div *ngFor="let option of poll.options" class="option">
+          <label class="option-label">
+            <input type="radio" name="vote" [value]="option.id" [(ngModel)]="selectedOption" required>
+            <span class="option-text">{{ option.text }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="!selectedOption || isLoading" class="btn btn-primary">
+          {{ isLoading ? 'Submitting...' : 'Submit Vote' }}
+        </button>
+        <a routerLink="/polls" class="btn btn-link">Back to Polls</a>
+      </div>
+    </form>
+
+    <div *ngIf="hasVoted" class="vote-success">
+      <div class="success-message">
+        <h3>Thank you for voting!</h3>
+        <p>Your vote has been recorded.</p>
+        
+        <div class="actions">
+          <a [routerLink]="['/polls', pollId, 'results']" class="btn btn-primary">View Results</a>
+          <a routerLink="/polls" class="btn btn-link">Back to Polls</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

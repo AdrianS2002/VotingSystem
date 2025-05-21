@@ -9,9 +9,20 @@ export const routes: Routes = [
     path: 'auth',
     loadComponent: () => import('./auth/auth.component').then(m => m.AuthComponent)
   },
-//   { path: 'polls', component: DummyComponent },
-//   { path: 'polls/:id', component: DummyComponent },
-//   { path: 'polls/:id/results', component: DummyComponent },
-//   { path: 'polls/create', component: DummyComponent },
+  { path: 'polls/create',
+    loadComponent: () => import('./polls/poll-create/poll-create.component').then(m => m.PollCreateComponent)
+  },
+  { 
+    path: 'polls/:id/results', 
+    loadComponent: () => import('./polls/poll-results/poll-results.component').then(m => m.PollResultsComponent) 
+  },
+  { 
+    path: 'polls/:id', 
+    loadComponent: () => import('./polls/poll-details/poll-details.component').then(m => m.PollDetailsComponent) 
+  },
+  { 
+    path: 'polls',
+    loadComponent: () => import('./polls/poll-list/poll-list.component').then(m => m.PollListComponent) 
+  },
 //   { path: 'about', component: DummyComponent },
 ];

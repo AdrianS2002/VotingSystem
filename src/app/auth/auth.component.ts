@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth',
@@ -22,7 +23,7 @@ export class AuthComponent {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
@@ -65,6 +66,9 @@ export class AuthComponent {
       if (res) {
         this.successMessage = 'Login successful!';
         this.loginForm.reset();
+        setTimeout(() => {
+          this.router.navigate(['/']);
+        }, 1000);
       }
       this.loading = false;
     });
