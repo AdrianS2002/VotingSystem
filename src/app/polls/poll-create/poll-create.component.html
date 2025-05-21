@@ -1,15 +1,34 @@
-    <h2>Creează un sondaj</h2>
-    <form (ngSubmit)="createPoll()">
-      <label>Subiect:</label>
-      <input [(ngModel)]="poll.subject" name="subject" required>
+<div class="poll-create-container">
+  <h2>Creează un sondaj</h2>
+  
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <form (ngSubmit)="createPoll()">
+    <div class="form-section">
+      <div class="subject-field">
+    <label for="subject-input">Subiect:</label>
+    <input 
+      id="subject-input"
+      [(ngModel)]="poll.subject" 
+      name="subject" 
+      required 
+      placeholder="Introduceți subiectul sondajului"
+      autocomplete="off">
+  </div>
 
       <label>Opțiuni:</label>
-      <div *ngFor="let option of poll.options; let i = index">
-        <input [(ngModel)]="option.text" [name]="'option' + i" required>
-        <button type="button" (click)="removeOption(i)">X</button>
+      <div *ngFor="let option of poll.options; let i = index" class="option-container">
+        <input [(ngModel)]="option.text" [name]="'option' + i" required placeholder="Opțiunea {{i+1}}">
+        <button type="button" class="remove-option" (click)="removeOption(i)">X</button>
       </div>
-      <button type="button" (click)="addOption()">Adaugă opțiune</button>
+      <button type="button" class="add-option" (click)="addOption()">+ Adaugă opțiune</button>
+    </div>
 
+    <div class="form-section">
+      <div class="section-title">Setări de vizibilitate</div>
+      
       <label>Vizibilitate:</label>
       <select [(ngModel)]="poll.visibility" name="visibility">
         <option value="public">Public</option>
@@ -17,11 +36,15 @@
         <option value="private">Anumite persoane</option>
       </select>
 
-      <div *ngIf="poll.visibility === 'private'">
+      <div *ngIf="poll.visibility === 'private'" class="private-voters">
         <label>Emailuri votanți (separate prin virgulă):</label>
-        <input [(ngModel)]="voterEmails" name="voterEmails">
+        <input [(ngModel)]="voterEmails" name="voterEmails" placeholder="email1@example.com, email2@example.com">
       </div>
+    </div>
 
+    <div class="form-section">
+      <div class="section-title">Setări de rezultate</div>
+      
       <label>Reguli afișare rezultate:</label>
       <select [(ngModel)]="poll.resultsVisibility" name="resultsVisibility">
         <option value="live">Live</option>
@@ -29,12 +52,22 @@
         <option value="afterExpiration">După expirare</option>
         <option value="afterAllVoted">După ce toți au votat</option>
       </select>
+    </div>
 
-      <label>Dată publicare:</label>
-      <input type="datetime-local" [(ngModel)]="poll.publishDate" name="publishDate">
+    <div class="form-section">
+      <div class="section-title">Perioadă</div>
+      
+      <div class="form-group">
+        <label>Dată publicare:</label>
+        <input type="datetime-local" [(ngModel)]="poll.publishDate" name="publishDate">
+      </div>
 
-      <label>Dată expirare:</label>
-      <input type="datetime-local" [(ngModel)]="poll.expiresAt" name="expiresAt">
+      <div class="form-group">
+        <label>Dată expirare:</label>
+        <input type="datetime-local" [(ngModel)]="poll.expiresAt" name="expiresAt">
+      </div>
+    </div>
 
-      <button type="submit">Creează sondaj</button>
-    </form>
+    <button type="submit">Creează sondaj</button>
+  </form>
+</div>
