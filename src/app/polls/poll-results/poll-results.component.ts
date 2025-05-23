@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Firestore, doc, getDoc, collection, getDocs } from '@angular/fire/firestore';
+import { Firestore, doc, getDoc, collection, getDocs, query, where } from '@angular/fire/firestore';
 import { Poll, PollOption } from '../../models/poll.model';
+import { ChartData, ChartOptions } from 'chart.js';
+import { NgChartsModule } from 'ng2-charts';
 
 interface ResultOption extends PollOption {
   votes: number;
@@ -16,7 +18,7 @@ interface PollResult extends Poll {
 @Component({
   selector: 'app-poll-results',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule,NgChartsModule],
   templateUrl: './poll-results.component.html',
   styleUrl: './poll-results.component.css'
 })
@@ -26,74 +28,91 @@ export class PollResultsComponent implements OnInit {
   isLoading: boolean = true;
   error: string | null = null;
   totalVotes: number = 0;
-  
+
   constructor(
     private route: ActivatedRoute,
     private firestore: Firestore
-  ) {}
+  ) { }
 
   async ngOnInit() {
-    this.isLoading = true;
-    
-    try {
-      this.pollId = this.route.snapshot.paramMap.get('id') || '';
-      if (!this.pollId) {
-        throw new Error('Poll ID is required');
-      }
+  this.isLoading = true;
 
-      const pollDoc = await getDoc(doc(this.firestore, `polls/${this.pollId}`));
-      if (!pollDoc.exists()) {
-        throw new Error('Poll not found');
-      }
+  try {
+    this.pollId = this.route.snapshot.paramMap.get('id') || '';
+    if (!this.pollId) throw new Error('Poll ID is required');
 
-      const pollData = { id: pollDoc.id, ...pollDoc.data() } as Poll;
-      
-      const votesSnapshot = await getDocs(collection(this.firestore, `polls/${this.pollId}/votes`));
-      const voteCounts: Record<string, number> = {};
-      
-      pollData.options.forEach(option => {
-        voteCounts[option.id] = 0;
-      });
-      
-      votesSnapshot.forEach(voteDoc => {
-        const voteData = voteDoc.data();
-        const optionId = voteData['optionId'] || '';
-        if (optionId && voteCounts.hasOwnProperty(optionId)) {
-          voteCounts[optionId] = (voteCounts[optionId] || 0) + 1;
-        }
-      });
-      
-      this.totalVotes = votesSnapshot.size;
-      
-      const resultOptions = pollData.options.map(option => {
-        const votes = voteCounts[option.id] || 0;
-        const percentage = this.totalVotes > 0 ? Math.round((votes / this.totalVotes) * 100) : 0;
-        
-        return {
-          ...option,
-          votes,
-          percentage
-        };
-      });
-      
-      resultOptions.sort((a, b) => b.votes - a.votes);
-      
-      this.poll = {
-        ...pollData,
-        resultOptions
+    const pollDoc = await getDoc(doc(this.firestore, `polls/${this.pollId}`));
+    if (!pollDoc.exists()) throw new Error('Poll not found');
+
+    const pollData = { id: pollDoc.id, ...pollDoc.data() } as Poll;
+
+    const voteQuery = query(
+      collection(this.firestore, 'votes'),
+      where('pollId', '==', this.pollId)
+    );
+    const voteSnapshot = await getDocs(voteQuery);
+
+    const voteCounts: Record<string, number> = {};
+    pollData.options.forEach(opt => voteCounts[opt.id] = 0);
+
+    voteSnapshot.forEach(doc => {
+      const vote = doc.data();
+      const optionId = vote['optionId'];
+      if (optionId in voteCounts) {
+        voteCounts[optionId]++;
+      }
+    });
+
+    this.totalVotes = voteSnapshot.size;
+
+    const resultOptions = pollData.options.map(opt => {
+      const votes = voteCounts[opt.id] || 0;
+      const percentage = this.totalVotes > 0 ? Math.round((votes / this.totalVotes) * 100) : 0;
+      return {
+        ...opt,
+        votes,
+        percentage
       };
-      
-    } catch (error) {
-      console.error('Error loading poll results:', error);
-      this.error = 'Failed to load poll results.';
-    } finally {
-      this.isLoading = false;
+    });
+
+    resultOptions.sort((a, b) => b.votes - a.votes);
+
+    this.poll = {
+      ...pollData,
+      resultOptions
+    };
+
+    let totalEligible = 0;
+    if (pollData.visibility === 'private') {
+      totalEligible = pollData.allowedVoters?.length || 0;
+    } else {
+      const usersSnapshot = await getDocs(collection(this.firestore, 'users'));
+      totalEligible = usersSnapshot.size;
     }
+
+    const voted = voteSnapshot.size;
+    const notVoted = Math.max(0, totalEligible - voted);
+
+    this.votedChartData = {
+      labels: ['Voted', 'Not Voted'],
+      datasets: [{
+        data: [voted, notVoted],
+        backgroundColor: ['#28a745', '#dc3545']
+      }]
+    };
+
+  } catch (error) {
+    console.error('Error loading poll results:', error);
+    this.error = 'Failed to load poll results.';
+  } finally {
+    this.isLoading = false;
   }
-  
+}
+
+
   isPollActive(): boolean {
     if (!this.poll) return false;
-    
+
     const expiryDate = this.getDateObject(this.poll.expiresAt);
     return expiryDate > new Date();
   }
@@ -109,10 +128,27 @@ export class PollResultsComponent implements OnInit {
     if (date && typeof date.toDate === 'function') {
       return date.toDate();
     }
-    
+
     return new Date(date);
   }
-  
+
+  votedChartData: ChartData<'pie'> = {
+    labels: ['Voted', 'Not Voted'],
+    datasets: [{ data: [0, 0], backgroundColor: ['#28a745', '#dc3545'] }]
+  };
+
+  votedChartOptions: ChartOptions<'pie'> = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  };
+
+
+
+
   getColorForIndex(index: number): string {
     const colors = [
       '#4285F4', // Google Blue
@@ -126,7 +162,7 @@ export class PollResultsComponent implements OnInit {
       '#AED581', // Light Green
       '#FFD54F'  // Light Yellow
     ];
-    
+
     return colors[index % colors.length];
   }
 }

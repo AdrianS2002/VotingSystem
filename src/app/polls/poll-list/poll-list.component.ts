@@ -2,8 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Poll } from '../../models/poll.model';
 import { PollService } from '../../services/poll.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+
 import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-poll-list',
@@ -16,7 +20,13 @@ export class PollListComponent implements OnInit {
   allPolls: Poll[] = [];
   polls: Poll[] = [];
   isLoading = true;
+  isAdmin = true;
   error: string | null = null;
+
+
+  constructor(private pollService: PollService, private authService: AuthService, private router: Router) { }
+
+
   
   searchTerm = '';
   statusFilter = 'all';
@@ -25,17 +35,22 @@ export class PollListComponent implements OnInit {
   itemsPerPage = 6;
   totalPages = 1;
   
-  constructor(private pollService: PollService) {}
-  
+
   ngOnInit() {
+    const profile = this.authService.currentUserProfile;
+    console.log('Profile:', profile);
+    if (!profile || profile.role !== 'admin') {
+      this.isAdmin = false;
+    }
+
     console.log('Initializing PollListComponent');
     this.loadPolls();
   }
-  
+
   loadPolls() {
     this.isLoading = true;
     this.error = null;
-    
+
     this.pollService.getPolls().subscribe({
       next: (polls) => {
         console.log('Polls loaded successfully:', polls);

@@ -1,4 +1,5 @@
 <div class="container">
+
   <h2>Polls</h2>
   
   <!-- Add filters, search, and create button -->
@@ -12,6 +13,7 @@
           placeholder="Search polls..." 
           [(ngModel)]="searchTerm" 
           (keyup.enter)="onSearch()" />
+
       </div>
       
       <div class="filter-group">
@@ -28,7 +30,7 @@
     </div>
     
     <!-- Create button -->
-    <a routerLink="/polls/create" class="btn btn-primary">Create New Poll</a>
+    <a routerLink="/polls/create" class="btn btn-primary" *ngIf="isAdmin">Create New Poll</a>
   </div>
   
   <!-- Loading state -->

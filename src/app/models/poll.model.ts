@@ -4,10 +4,14 @@ export type ResultVisibility = 'live' | 'after100Votes' | 'afterExpiration' | 'a
 export interface PollOption {
   id: string;
   text: string;
+  votes?: number;
+  percentage?: number;
 }
 
 export interface Poll {
+  title?: string;
   id?: string;
+  description?: string;
   subject: string;
   options: PollOption[];
   visibility: PollVisibility;
