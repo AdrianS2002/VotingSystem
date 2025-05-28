@@ -1,3 +1,4 @@
+
 <footer>
   <div class="container footer-content">
     <div class="footer-section">
@@ -8,10 +9,14 @@
     <div class="footer-section">
       <h3>Quick Links</h3>
       <ul class="footer-links">
-        <li><a routerLink="/">Home</a></li>
-        <li><a routerLink="/polls">Polls</a></li>
-        <li><a routerLink="/create">Create Poll</a></li>
-        <li><a routerLink="/auth">Login</a></li>
+        <li><a href="#" (click)="navigateToHome($event)">Home</a></li>
+        <li><a href="#" (click)="navigateToPolls($event)">Polls</a></li>
+        <li *ngIf="(authService.user | async) as user; else showLoginFooter">
+          <a href="#" (click)="logout($event)">Logout</a>
+        </li>
+        <ng-template #showLoginFooter>
+          <li><a href="#" (click)="navigateToAuth($event)">Login</a></li>
+        </ng-template>
       </ul>
     </div>
 
