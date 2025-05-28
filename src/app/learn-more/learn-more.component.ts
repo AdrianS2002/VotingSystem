@@ -1,14 +1,24 @@
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf, AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../services/auth.service'; // adjust path as needed
+import { Observable } from 'rxjs';
+import { User } from '../models/user';
+
 
 @Component({
   selector: 'app-learn-more',
   templateUrl: './learn-more.component.html',
   styleUrls: ['./learn-more.component.css'],
   standalone: true,
-  imports: [NgFor]
+  imports: [NgFor, NgIf, AsyncPipe]
 })
 export class LearnMoreComponent implements OnInit {
+  user$: Observable<User | null>;
+
+   constructor(private authService: AuthService) {
+    this.user$ = this.authService.user.asObservable();
+  }
+
   features = [
     {
       icon: 'fa-vote-yea',
@@ -73,7 +83,7 @@ export class LearnMoreComponent implements OnInit {
     }
   ];
 
-  constructor() { }
+
 
   ngOnInit(): void {
     // Any initialization logic here

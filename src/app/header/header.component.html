@@ -1,15 +1,15 @@
 <header>
   <div class="container navbar">
-    <a class="logo" routerLink="/">
-      <i class="fas fa-vote-yea"></i> VoteNow
-    </a>
+   <a class="logo" href="#" (click)="navigateToHome($event)">
+  <i class="fas fa-vote-yea"></i> VoteNow
+</a>
+
     <div class="burger-menu" (click)="toggleMenu()">
       <i class="fas fa-bars"></i>
     </div>
     <ul class="nav-links" [class.active]="isMenuOpen">
       <li><a href="#" (click)="navigateToHome($event)">Home</a></li>
       <li><a href="#" (click)="navigateToPolls($event)">Polls</a></li>
-      <li><a routerLink="/results">Results</a></li>
       <li *ngIf="(authService.user | async) as user; else showLogin">
         <a href="#" (click)="logout($event)">Logout</a>
       </li>

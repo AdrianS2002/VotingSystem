@@ -5,10 +5,10 @@
       <div class="header-content">
         <h1>Learn More About Our Platform</h1>
         <p>Discover how our secure voting system can transform your decision-making process</p>
-        <div class="cta-buttons">
-          <a href="/register" class="btn btn-primary">Get Started</a>
-          <a href="/demo" class="btn btn-outline">Request Demo</a>
+        <div class="cta-buttons" *ngIf="(user$ | async) === null">
+          <a href="/auth" class="btn btn-primary">Get Started</a>
         </div>
+
       </div>
     </div>
   </header>
@@ -109,7 +109,6 @@
         <p>Join thousands of organizations making better decisions with our platform.</p>
         <div class="cta-buttons">
           <a href="/register" class="btn btn-primary">Create Free Account</a>
-          <a href="/pricing" class="btn btn-outline">View Pricing Plans</a>
         </div>
       </div>
     </div>
