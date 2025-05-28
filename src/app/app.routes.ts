@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { AuthComponent } from './auth/auth.component';
 import { DummyComponent } from './dummy/dummy.component'; 
+import { LearnMoreComponent } from './learn-more/learn-more.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -24,5 +25,5 @@ export const routes: Routes = [
     path: 'polls',
     loadComponent: () => import('./polls/poll-list/poll-list.component').then(m => m.PollListComponent) 
   },
-//   { path: 'about', component: DummyComponent },
+   { path: 'about', component: LearnMoreComponent },
 ];
