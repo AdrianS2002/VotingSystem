@@ -3,6 +3,7 @@ import { HomeComponent } from './home/home.component';
 import { AuthComponent } from './auth/auth.component';
 import { DummyComponent } from './dummy/dummy.component'; 
 import { LearnMoreComponent } from './learn-more/learn-more.component';
+import { AuthGuard } from './auth.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -11,7 +12,7 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/auth.component').then(m => m.AuthComponent)
   },
   { path: 'polls/create',
-    loadComponent: () => import('./polls/poll-create/poll-create.component').then(m => m.PollCreateComponent)
+    loadComponent: () => import('./polls/poll-create/poll-create.component').then(m => m.PollCreateComponent), canActivate: [AuthGuard]
   },
   { 
     path: 'polls/:id/results', 

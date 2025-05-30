@@ -19,6 +19,7 @@ import { Router } from '@angular/router';
 export class HomeComponent implements OnInit {
   isLoggedIn = false;
   username = '';
+  hasRole ='';
   today = new Date();
   featuredPolls: Poll[] = [];
   recentPolls: Poll[] = [];
@@ -42,7 +43,8 @@ export class HomeComponent implements OnInit {
     const profile = this.authService.currentUserProfile;
     this.isLoggedIn = !!profile;
     this.username = profile?.name || '';
-
+    this.hasRole = profile?.role || '';
+    console.log('User Profile:', profile);
     const allPolls = [...this.featuredPolls, ...this.recentPolls, ...this.popularPolls];
     
     // Remove duplicates (by id)
