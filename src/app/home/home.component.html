@@ -158,7 +158,7 @@
   </ng-template>
 
   <!-- Call to Action -->
-  <section class="cta-section">
+  <section class="cta-section" *ngIf="hasRole == 'admin'">
     <div class="cta-content">
       <h2 class="cta-title">Create Your Own Poll</h2>
       <p class="cta-text">Have a question you want to ask the community? Create your own poll and get instant feedback.</p>
