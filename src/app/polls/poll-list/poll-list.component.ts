@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Poll } from '../../models/poll.model';
 import { PollService } from '../../services/poll.service';
 import { CommonModule } from '@angular/common';
-
+import { ViewChild, ElementRef } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './poll-list.component.css'
 })
 export class PollListComponent implements OnInit {
+   @ViewChild('resultsSection') resultsSection!: ElementRef;
   allPolls: Poll[] = [];
   polls: Poll[] = [];
   isLoading = true;
@@ -108,11 +109,24 @@ export class PollListComponent implements OnInit {
     this.polls = filteredPolls.slice(startIndex, startIndex + this.itemsPerPage);
   }
   
+onSearch() {
+  this.currentPage = 1;
+  this.applyFilters();
 
-  onSearch() {
-    this.currentPage = 1; 
-    this.applyFilters();
-  }
+  setTimeout(() => {
+    if (this.resultsSection) {
+      const offset = 100; // adjust this value as needed
+      const elementPosition = this.resultsSection.nativeElement.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  }, 100);
+}
+
   
   onStatusFilterChange() {
     this.currentPage = 1; 

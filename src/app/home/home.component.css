@@ -123,7 +123,6 @@
   text-decoration: underline;
 }
 
-/* Polls Grid Layout */
 .polls-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -178,7 +177,7 @@
   margin-bottom: 0.75rem;
 }
 
-/* Stats Section */
+
 .stats-section {
   background-color: var(--light-bg);
   border-radius: 8px;
@@ -202,7 +201,7 @@
 }
 
 .stat-icon {
-  font-size: 2rem;
+  font-size: 6rem;
   color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
