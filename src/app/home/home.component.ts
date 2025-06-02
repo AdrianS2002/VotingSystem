@@ -68,11 +68,11 @@ export class HomeComponent implements OnInit {
         return;
       }
 
-      if (this.isLoggedIn) {
+      // if (this.isLoggedIn) {
         this.router.navigate(['/polls', pollId]);
-      } else {
-        this.router.navigate(['/auth']);
-      }
+      // } else {
+      //   this.router.navigate(['/auth']);
+      // }
     }
 
 

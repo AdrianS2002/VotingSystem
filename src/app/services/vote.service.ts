@@ -17,31 +17,53 @@ export class VoteService {
     return this.authService.user.pipe(
       take(1),
       switchMap(user => {
-        if (!user) {
-          return throwError(() => new Error('User must be logged in to vote.'));
-        }
-
-        const voteQuery = query(voteCollection, where('pollId', '==', pollId), where('userId', '==', user.id));
-        return from(getDocs(voteQuery)).pipe(
-          switchMap(snapshot => {
-            if (!snapshot.empty) {
-              return throwError(() => new Error('You have already voted in this poll.'));
+        return from(this.getUserIdWithFallback(user)).pipe(
+          switchMap(userId => {
+            if (!userId) {
+              return throwError(() => new Error('Unable to identify user. Please try again.'));
             }
 
-            const vote: Vote = {
-              pollId,
-              userId: user.id,
-              optionId,
-              optionText,
-              votedAt: new Date()
-            };
+            const voteQuery = query(voteCollection, where('pollId', '==', pollId), where('userId', '==', userId));
+            return from(getDocs(voteQuery)).pipe(
+              switchMap(snapshot => {
+                if (!snapshot.empty) {
+                  return throwError(() => new Error('You have already voted in this poll.'));
+                }
 
-            return from(addDoc(voteCollection, vote)).pipe(
-              switchMap(() => of(void 0))
+                const vote: Vote = {
+                  pollId,
+                  userId: userId,
+                  optionId,
+                  optionText,
+                  isAnonymous: !user || !user.id,
+                  votedAt: new Date()
+                };
+
+                return from(addDoc(voteCollection, vote)).pipe(
+                  switchMap(() => of(void 0))
+                );
+              })
             );
           })
         );
       })
     );
+  }
+
+  // Create a method to handle the same fingerprint logic as in PollDetailsComponent
+  private async getUserIdWithFallback(user: any): Promise<string> {
+    // If user is authenticated, use their ID
+    if (user && user.id) {
+      return user.id;
+    }
+
+    // Otherwise, use the fingerprint from localStorage (anonymous user)
+    let fingerprint = localStorage.getItem('anonymous-voter-id');
+    if (!fingerprint) {
+      fingerprint = 'anon-' + crypto.randomUUID();
+      localStorage.setItem('anonymous-voter-id', fingerprint);
+    }
+    
+    return fingerprint;
   }
 }
