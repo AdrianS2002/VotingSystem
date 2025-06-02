@@ -22,6 +22,10 @@ export const routes: Routes = [
     path: 'polls/:id', 
     loadComponent: () => import('./polls/poll-details/poll-details.component').then(m => m.PollDetailsComponent) 
   },
+  {
+    path: 'my-polls',
+    loadComponent: () => import('./my-polls/my-polls.component').then(m => m.MyPollsComponent),
+  },
   { 
     path: 'polls',
     loadComponent: () => import('./polls/poll-list/poll-list.component').then(m => m.PollListComponent) 

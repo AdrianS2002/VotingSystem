@@ -1,0 +1,53 @@
+<div class="container main-content">
+  <section class="polls-section">
+    <div class="section-header">
+      <h2 class="section-title">My Created Polls</h2>
+    </div>
+
+    <div *ngIf="isLoading">
+      <p>Loading your polls...</p>
+    </div>
+
+    <div *ngIf="!isLoading && myPolls.length === 0">
+      <p>You haven't created any polls yet.</p>
+      <a routerLink="/polls/create" class="btn btn-primary">Start by Creating One</a>
+    </div>
+
+    <div class="polls-grid" *ngIf="myPolls.length > 0">
+      <div
+        class="vote-card"
+        *ngFor="let poll of myPolls"
+        [ngClass]="{ 'disabled-card': poll.expiresAt < today }"
+      >
+        <div class="vote-header">
+          <h3 class="vote-title">{{ poll.subject }}</h3>
+          <span
+            class="vote-status"
+            [ngClass]="poll.expiresAt < today ? 'status-ended' : 'status-active'"
+          >
+            {{ poll.expiresAt < today ? 'Expired' : 'Active' }}
+          </span>
+        </div>
+
+        <p class="vote-description">
+          {{ poll.description || 'No description provided.' }}
+        </p>
+
+        <div class="vote-info">
+          <div class="vote-info-item">
+            <i class="fas fa-users"></i> {{ poll.totalVotes }} Votes
+          </div>
+          <div class="vote-info-item">
+            <i class="fas fa-calendar-alt"></i>
+            Ends {{ poll.expiresAt | date: 'mediumDate' }}
+          </div>
+        </div>
+
+        <div class="vote-actions">
+          <a [routerLink]="['/polls', poll.id]" class="btn btn-primary">View Poll</a>
+          <a [routerLink]="['/polls', poll.id, 'results']" class="btn-results">See Results</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
