@@ -44,6 +44,16 @@ export class PollDetailsComponent implements OnInit {
 
       this.poll = { id: pollDoc.id, ...pollDoc.data() } as Poll;
 
+    const isAdmin = this.authService.currentUserProfile?.role === 'admin';
+    const now = new Date();
+    const publishDate = this.getDateObject(this.poll.publishDate);
+    
+    if (!isAdmin && publishDate > now) {
+      this.error = 'This poll is not yet available.';
+      this.router.navigate(['/polls']);
+      return;
+    }
+
       const userId = await this.getVoterId();
       const voteQuery = query(
         collection(this.firestore, 'votes'),
@@ -148,4 +158,14 @@ export class PollDetailsComponent implements OnInit {
     
     return 'anon-' + Date.now() + '-' + Math.random().toString(36).substring(2);
   }
+
+  private getDateObject(date: any): Date {
+  if (date instanceof Date) return date;
+
+  if (date && typeof date.toDate === 'function') {
+    return date.toDate();
+  }
+
+  return new Date(date);
+}
 }
