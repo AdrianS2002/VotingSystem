@@ -11,7 +11,7 @@ import { CommonModule, NgIf } from '@angular/common';
   standalone: true
 })
 export class HeaderComponent {
-  constructor(private router: Router, public authService: AuthService) {}
+  constructor(private router: Router, public authService: AuthService) { }
 
   isMenuOpen = false;
 
@@ -20,25 +20,35 @@ export class HeaderComponent {
   }
 
   navigateToHome(event: Event) {
-      event.preventDefault(); 
-      this.router.navigate(['/']);
+    event.preventDefault();
+    this.router.navigate(['/']);
   }
 
   navigateToPolls(event: Event) {
-      event.preventDefault(); 
-      this.router.navigate(['/polls']);    
+    event.preventDefault();
+    this.router.navigate(['/polls']);
   }
 
-    navigateToAuth(event: Event) {
-      event.preventDefault(); 
-      console.log('Login clicked, navigating...');
-      this.router.navigate(['/auth']);
+  navigateToAuth(event: Event) {
+    event.preventDefault();
+    console.log('Login clicked, navigating...');
+    this.router.navigate(['/auth']);
+  }
+
+  navigateToMyPolls(event: Event) {
+    event.preventDefault();
+    this.router.navigate(['/my-polls']);
+  }
+
+  isAdmin(): boolean {
+    const profile = this.authService.currentUserProfile;
+    return profile?.role === 'admin';
   }
 
   logout(event: Event) {
-  event.preventDefault();
-  this.authService.logout();
-}
+    event.preventDefault();
+    this.authService.logout();
+  }
 
 
 
