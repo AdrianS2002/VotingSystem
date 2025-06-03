@@ -86,6 +86,14 @@ export class PollListComponent implements OnInit {
   applyFilters() {
     let filteredPolls = [...this.allPolls];
     
+  if (!this.isAdmin) {
+    const now = new Date();
+    filteredPolls = filteredPolls.filter(poll => {
+      const publishDate = this.getDateObject(poll.publishDate);
+      return publishDate <= now;
+    });
+  }
+
     if (this.searchTerm?.trim()) {
       const term = this.searchTerm.toLowerCase().trim();
       filteredPolls = filteredPolls.filter(poll => 
@@ -108,6 +116,16 @@ export class PollListComponent implements OnInit {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     this.polls = filteredPolls.slice(startIndex, startIndex + this.itemsPerPage);
   }
+
+  private getDateObject(date: any): Date {
+  if (date instanceof Date) return date;
+
+  if (date && typeof date.toDate === 'function') {
+    return date.toDate();
+  }
+
+  return new Date(date);
+}
   
 onSearch() {
   this.currentPage = 1;
@@ -115,7 +133,7 @@ onSearch() {
 
   setTimeout(() => {
     if (this.resultsSection) {
-      const offset = 100; // adjust this value as needed
+      const offset = 100; 
       const elementPosition = this.resultsSection.nativeElement.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - offset;
 
@@ -133,9 +151,13 @@ onSearch() {
     this.applyFilters();
   }
   
-  isPollExpired(poll: Poll): boolean {
-    return new Date(poll.expiresAt) < new Date();
-  }
+isPollExpired(poll: Poll): boolean {
+  return this.getDateObject(poll.expiresAt) < new Date();
+}
+
+isPollPublished(poll: Poll): boolean {
+  return this.getDateObject(poll.publishDate) <= new Date();
+}
 
   formatDate(date: any): string {
     if (!date) return '';

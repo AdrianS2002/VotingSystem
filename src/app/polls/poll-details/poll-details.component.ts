@@ -44,6 +44,16 @@ export class PollDetailsComponent implements OnInit {
 
       this.poll = { id: pollDoc.id, ...pollDoc.data() } as Poll;
 
+    const isAdmin = this.authService.currentUserProfile?.role === 'admin';
+    const now = new Date();
+    const publishDate = this.getDateObject(this.poll.publishDate);
+    
+    if (!isAdmin && publishDate > now) {
+      this.error = 'This poll is not yet available.';
+      this.router.navigate(['/polls']);
+      return;
+    }
+
       const userId = await this.getVoterId();
       const voteQuery = query(
         collection(this.firestore, 'votes'),
@@ -79,23 +89,25 @@ export class PollDetailsComponent implements OnInit {
       const normalizedEmails = this.poll.allowedVoters.map(email => email.trim().toLowerCase());
       const currentEmail = this.userEmail.trim().toLowerCase();
 
-      console.log('Normalized Emails:', normalizedEmails);
-      console.log('Current Email:', currentEmail);
-
       if (!normalizedEmails.includes(currentEmail)) {
         this.error = 'You are not allowed to vote in this private poll.';
         return;
       }
     }
 
-
     this.isLoading = true;
 
     try {
       const selected = this.poll.options.find(opt => opt.id === this.selectedOption);
       if (!selected) throw new Error('Selected option not found');
-
-      await this.voteService.vote(this.pollId, selected.id, selected.text).toPromise();
+      await new Promise<void>((resolve, reject) => {
+        this.voteService.vote(this.pollId, selected.id, selected.text)
+          .subscribe({
+            next: () => resolve(),
+            error: (err) => reject(err)
+          });
+      });
+      
       const pollRef = doc(this.firestore, `polls/${this.pollId}`);
       await setDoc(pollRef, {
         totalVotes: (this.poll.totalVotes || 0) + 1
@@ -118,20 +130,42 @@ export class PollDetailsComponent implements OnInit {
   }
 
   private async getVoterId(): Promise<string> {
-    const user = this.authService.currentUserProfile;
 
+    const user = this.authService.currentUserProfile;
+    
     if (user && user.uid) {
+      console.log("Using authenticated user ID:", user.uid);
       this.userEmail = user.email || '';
       return user.uid;
     }
 
-    let fingerprint = localStorage.getItem('anonymous-voter-id');
+    const STORAGE_KEY = 'anonymous-voter-id';
+    let fingerprint = localStorage.getItem(STORAGE_KEY);
+    
     if (!fingerprint) {
-      fingerprint = 'anon-' + crypto.randomUUID();
-      localStorage.setItem('anonymous-voter-id', fingerprint);
+      fingerprint = this.generateAnonymousId();
+      localStorage.setItem(STORAGE_KEY, fingerprint);
     }
-
-    this.userEmail = 'anonymous';
+    
+    console.log("Using anonymous ID:", fingerprint);
     return fingerprint;
   }
+
+  private generateAnonymousId(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return 'anon-' + crypto.randomUUID();
+    }
+    
+    return 'anon-' + Date.now() + '-' + Math.random().toString(36).substring(2);
+  }
+
+  private getDateObject(date: any): Date {
+  if (date instanceof Date) return date;
+
+  if (date && typeof date.toDate === 'function') {
+    return date.toDate();
+  }
+
+  return new Date(date);
+}
 }

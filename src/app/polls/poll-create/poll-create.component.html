@@ -54,20 +54,35 @@
       </select>
     </div>
 
-    <div class="form-section">
-      <div class="section-title">Perioadă</div>
-      
-      <div class="form-group">
-        <label>Dată publicare:</label>
-        <input type="datetime-local" [(ngModel)]="poll.publishDate" name="publishDate">
-      </div>
+<div class="form-section">
+  <div class="section-title">Perioadă</div>
+  
+  <div class="form-group">
+    <label>Dată publicare:</label>
+    <input 
+      type="datetime-local" 
+      [(ngModel)]="poll.publishDate" 
+      name="publishDate"
+      (change)="dateValidation = validateDates()">
+  </div>
 
-      <div class="form-group">
-        <label>Dată expirare:</label>
-        <input type="datetime-local" [(ngModel)]="poll.expiresAt" name="expiresAt">
-      </div>
-    </div>
+  <div class="form-group">
+    <label>Dată expirare:</label>
+     
+    <input 
+      type="datetime-local" 
+      [(ngModel)]="poll.expiresAt" 
+      name="expiresAt"
+      (change)="dateValidation = validateDates()">
+  </div>
 
-    <button type="submit">Creează sondaj</button>
-  </form>
+  <div 
+    *ngIf="dateValidation && !dateValidation.valid" 
+    class="validation-error">
+    {{ dateValidation.message }}
+  </div>
+</div>
+
+<button type="submit">Creează sondaj</button>
+</form>
 </div>
