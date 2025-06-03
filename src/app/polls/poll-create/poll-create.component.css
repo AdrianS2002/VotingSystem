@@ -42,8 +42,43 @@ input:focus, select:focus {
 }
 
 input[type="datetime-local"] {
+  appearance: none;
+  -webkit-appearance: none;
   color: var(--text-color);
+  background-color: #ffffff;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-family: inherit;
+  font-size: 1rem;
+  width: 95%;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: var(--transition);
 }
+
+input[type="datetime-local"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(101, 118, 215, 0.2);
+  outline: none;
+}
+
+input[type="datetime-local"]:hover {
+  border-color: #bbb;
+}
+
+
+/* Validation error styling */
+.validation-error {
+  color: var(--error);
+  background-color: rgba(244, 67, 54, 0.08);
+  border-left: 3px solid var(--error);
+  padding: 0.75rem 1rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
 
 .option-container {
   display: flex;
@@ -217,6 +252,16 @@ button[type="submit"]:hover {
   
   label {
     margin-bottom: 0.35rem;
+  }
+
+    input[type="datetime-local"] {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.95rem;
+  }
+  
+  .form-section.date-section {
+    padding: 1.25rem 1rem;
+    margin: 0 -0.25rem 1.25rem;
   }
 }
 

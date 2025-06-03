@@ -23,7 +23,7 @@ export class PollCreateComponent implements OnInit {
     totalVotes: 0,
     createdBy: '',
   };
-
+  dateValidation?: {valid: boolean, message?: string};
   voterEmails = '';
   isLoading = false;
 
@@ -33,9 +33,17 @@ export class PollCreateComponent implements OnInit {
     this.addOption();
     this.addOption();
     
+    // Set default dates with proper formatting for input fields
+    const now = new Date();
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 7);
-    this.poll.expiresAt = expiryDate;
+    
+    // Format dates for datetime-local input
+    this.poll.publishDate = this.formatDateForInput(now);
+    this.poll.expiresAt = this.formatDateForInput(expiryDate);
+    
+    // Run initial validation
+    this.dateValidation = this.validateDates();
   }
 
    generateId(): string {
@@ -70,30 +78,94 @@ export class PollCreateComponent implements OnInit {
       return;
     }
 
-    this.poll.options = validOptions;
+    const dateValidation = this.validateDates();
+    if (!dateValidation.valid) {
+      alert(dateValidation.message);
+      return;
+    }
+
+    const pollToSubmit = {
+      ...this.poll,
+      options: validOptions,
+      publishDate: new Date(this.poll.publishDate),
+      expiresAt: new Date(this.poll.expiresAt)
+    };
 
     if (this.poll.visibility === 'private') {
       if (!this.voterEmails.trim()) {
         alert('Please provide voter emails for private poll');
         return;
       }
-      this.poll.allowedVoters = this.voterEmails.split(',').map(email => email.trim());
+      pollToSubmit.allowedVoters = this.voterEmails.split(',').map(email => email.trim());
     }
 
     this.isLoading = true;
-      this.pollService.createPoll(this.poll).subscribe({
-    next: () => {
-      this.isLoading = false;
-      // Add a short delay before navigation to show success message
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 1000);
-    },
-    error: (error) => {
-      console.error('Error creating poll:', error);
-      alert('Failed to create poll. Please try again.');
-      this.isLoading = false;
-    }
-  });
+    this.pollService.createPoll(pollToSubmit).subscribe({
+      next: () => {
+        this.isLoading = false;
+        setTimeout(() => {
+          this.router.navigate(['/']);
+        }, 1000);
+      },
+      error: (error) => {
+        console.error('Error creating poll:', error);
+        alert('Failed to create poll. Please try again.');
+        this.isLoading = false;
+      }
+    });
   }
+
+
+validateDates(): {valid: boolean, message?: string} {
+  let startDate: Date;
+  let endDate: Date;
+
+  if (typeof this.poll.publishDate === 'string') {
+    startDate = new Date(this.poll.publishDate);
+  } else {
+    startDate = this.poll.publishDate;
+  }
+
+  if (typeof this.poll.expiresAt === 'string') {
+    endDate = new Date(this.poll.expiresAt);
+  } else {
+    endDate = this.poll.expiresAt;
+  }
+
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return {
+      valid: false,
+      message: 'Datele introduse nu sunt valide.'
+    };
+  }
+  
+  if (endDate <= startDate) {
+    return {
+      valid: false,
+      message: 'Data de expirare trebuie să fie după data de publicare.'
+    };
+  }
+
+  const diffMs = endDate.getTime() - startDate.getTime();
+  const diffMinutes = diffMs / (1000 * 60);
+  
+  if (diffMinutes < 1) {
+    return {
+      valid: false,
+      message: 'Trebuie să existe cel puțin un minut între data de publicare și data de expirare.'
+    };
+  }
+  
+  return { valid: true };
+}
+
+formatDateForInput(date: Date): any {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
 }
