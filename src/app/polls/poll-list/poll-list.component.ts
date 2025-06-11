@@ -5,9 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ViewChild, ElementRef } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-
 import { FormsModule } from '@angular/forms';
-
 
 @Component({
   selector: 'app-poll-list',
@@ -17,34 +15,35 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './poll-list.component.css'
 })
 export class PollListComponent implements OnInit {
-   @ViewChild('resultsSection') resultsSection!: ElementRef;
+  @ViewChild('resultsSection') resultsSection!: ElementRef;
   allPolls: Poll[] = [];
   polls: Poll[] = [];
   isLoading = true;
-  isAdmin = true;
+  isAdmin = false;
+  isAuthenticated = false;
   error: string | null = null;
 
-
-  constructor(private pollService: PollService, private authService: AuthService, private router: Router) { }
-
-
-  
   searchTerm = '';
-  statusFilter = 'all';
+  // Change default to 'active'
+  statusFilter = 'active';
   
   currentPage = 1;
   itemsPerPage = 6;
   totalPages = 1;
   
+  constructor(private pollService: PollService, private authService: AuthService, private router: Router) { }
 
   ngOnInit() {
     const profile = this.authService.currentUserProfile;
     console.log('Profile:', profile);
-    if (!profile || profile.role !== 'admin') {
-      this.isAdmin = false;
-    }
+    
+    // Set authentication status
+    this.isAuthenticated = !!profile;
+    this.isAdmin = profile?.role === 'admin';
 
-    console.log('Initializing PollListComponent');
+    console.log('Is authenticated:', this.isAuthenticated);
+    console.log('Is admin:', this.isAdmin);
+    
     this.loadPolls();
   }
 
@@ -67,46 +66,78 @@ export class PollListComponent implements OnInit {
     });
   }
   
-  setPage(page: number) {
-    if (page < 1 || page > this.totalPages) {
-      return;
-    }
-    this.currentPage = page;
-    this.applyFilters();
-  }
-  
-  nextPage() {
-    this.setPage(this.currentPage + 1);
-  }
-  
-  prevPage() {
-    this.setPage(this.currentPage - 1);
-  }
-  
   applyFilters() {
-    let filteredPolls = [...this.allPolls];
-    
-  if (!this.isAdmin) {
     const now = new Date();
-    filteredPolls = filteredPolls.filter(poll => {
-      const publishDate = this.getDateObject(poll.publishDate);
-      return publishDate <= now;
+    console.log('Current date/time:', now);
+    
+    // Step 1: Filter by visibility based on user authentication
+    let filteredPolls = this.allPolls.filter(poll => {
+      // Admin can see all polls
+      if (this.isAdmin) {
+        return true;
+      }
+      
+      // Public polls are visible to everyone
+      if (poll.visibility === 'public') {
+        return true;
+      }
+      
+      // Registered polls are only visible to authenticated users
+      if (poll.visibility === 'registered' && this.isAuthenticated) {
+        return true;
+      }
+      
+      // Private polls are only visible to allowed users
+      if (poll.visibility === 'private' && this.isAuthenticated) {
+        const userEmail = this.authService.currentUserProfile?.email?.toLowerCase();
+        return poll.allowedVoters?.some(email => 
+          email.toLowerCase() === userEmail
+        );
+      }
+      
+      // Default: not visible
+      return false;
     });
-  }
-
+    
+    console.log('After visibility filtering:', filteredPolls.length);
+    
+    // Step 2: Filter by status
+    switch (this.statusFilter) {
+      case 'active':
+        // Active polls: published but not expired
+        filteredPolls = filteredPolls.filter(poll => 
+          this.isPollPublished(poll) && !this.isPollExpired(poll)
+        );
+        break;
+      case 'future':
+        // Future polls: not yet published
+        filteredPolls = filteredPolls.filter(poll => 
+          !this.isPollPublished(poll)
+        );
+        break;
+      case 'past':
+        // Past polls: already expired
+        filteredPolls = filteredPolls.filter(poll => 
+          this.isPollExpired(poll)
+        );
+        break;
+      case 'all':
+        // No additional filtering needed for 'all'
+        break;
+    }
+    
+    console.log(`After ${this.statusFilter} status filtering:`, filteredPolls.length);
+    
+    // Step 3: Filter by search term
     if (this.searchTerm?.trim()) {
       const term = this.searchTerm.toLowerCase().trim();
       filteredPolls = filteredPolls.filter(poll => 
         poll.subject.toLowerCase().includes(term)
       );
+      console.log('After search filtering:', filteredPolls.length);
     }
     
-    if (this.statusFilter === 'active') {
-      filteredPolls = filteredPolls.filter(poll => !this.isPollExpired(poll));
-    } else if (this.statusFilter === 'expired') {
-      filteredPolls = filteredPolls.filter(poll => this.isPollExpired(poll));
-    }
-    
+    // Update pagination
     this.totalPages = Math.max(1, Math.ceil(filteredPolls.length / this.itemsPerPage));
     
     if (this.currentPage > this.totalPages) {
@@ -117,52 +148,58 @@ export class PollListComponent implements OnInit {
     this.polls = filteredPolls.slice(startIndex, startIndex + this.itemsPerPage);
   }
 
-  private getDateObject(date: any): Date {
-  if (date instanceof Date) return date;
-
-  if (date && typeof date.toDate === 'function') {
-    return date.toDate();
+  isPollExpired(poll: Poll): boolean {
+    const now = new Date();
+    const expiryDate = this.getDateObject(poll.expiresAt);
+    return expiryDate < now;
   }
 
-  return new Date(date);
-}
-  
-onSearch() {
-  this.currentPage = 1;
-  this.applyFilters();
+  isPollPublished(poll: Poll): boolean {
+    const now = new Date();
+    const publishDate = this.getDateObject(poll.publishDate);
+    return publishDate <= now;
+  }
 
-  setTimeout(() => {
-    if (this.resultsSection) {
-      const offset = 100; 
-      const elementPosition = this.resultsSection.nativeElement.getBoundingClientRect().top + window.pageYOffset;
-      const offsetPosition = elementPosition - offset;
+  isPollActive(poll: Poll): boolean {
+    return this.isPollPublished(poll) && !this.isPollExpired(poll);
+  }
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+  private getDateObject(date: any): Date {
+    if (date instanceof Date) return date;
+
+    if (date && typeof date.toDate === 'function') {
+      return date.toDate();
     }
-  }, 100);
-}
 
+    return new Date(date);
+  }
+  
+  onSearch() {
+    this.currentPage = 1;
+    this.applyFilters();
+
+    setTimeout(() => {
+      if (this.resultsSection) {
+        const offset = 100; 
+        const elementPosition = this.resultsSection.nativeElement.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+  }
   
   onStatusFilterChange() {
     this.currentPage = 1; 
     this.applyFilters();
   }
-  
-isPollExpired(poll: Poll): boolean {
-  return this.getDateObject(poll.expiresAt) < new Date();
-}
-
-isPollPublished(poll: Poll): boolean {
-  return this.getDateObject(poll.publishDate) <= new Date();
-}
 
   formatDate(date: any): string {
     if (!date) return '';
     
-   
     if (date && typeof date.toDate === 'function') {
       date = date.toDate();
     }
@@ -171,7 +208,17 @@ isPollPublished(poll: Poll): boolean {
     return d.toLocaleDateString();
   }
   
- 
+  formatTime(date: any): string {
+    if (!date) return '';
+    
+    if (date && typeof date.toDate === 'function') {
+      date = date.toDate();
+    }
+    
+    const d = new Date(date);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  
   get pageNumbers(): number[] {
     const pages: number[] = [];
     
@@ -187,5 +234,21 @@ isPollPublished(poll: Poll): boolean {
     }
     
     return pages;
+  }
+  
+  setPage(page: number) {
+    if (page < 1 || page > this.totalPages) {
+      return;
+    }
+    this.currentPage = page;
+    this.applyFilters();
+  }
+  
+  nextPage() {
+    this.setPage(this.currentPage + 1);
+  }
+  
+  prevPage() {
+    this.setPage(this.currentPage - 1);
   }
 }

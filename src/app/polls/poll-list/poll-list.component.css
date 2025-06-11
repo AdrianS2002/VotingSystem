@@ -395,6 +395,50 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.poll-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* Status badges */
+.status-badge.active {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+}
+
+.status-badge.expired,
+.status-badge.past {
+  background-color: rgba(158, 158, 158, 0.15);
+  color: #757575;
+}
+
+.status-badge.future {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.time {
+  font-size: 0.85rem;
+  color: #666;
+  margin-left: 5px;
+}
+
+.btn-sm.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+  background-color: #e0e0e0;
+  color: #757575;
+}
+
+/* Optional: highlight the current filter in the dropdown */
+#status-filter option[selected] {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
 .public {
   background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
   color: var(--success);
