@@ -76,51 +76,69 @@ export class HomeComponent implements OnInit {
     }
 
 
-  loadPolls(): void {
-    this.pollService.getPolls().subscribe({
-      next: (polls: Poll[]) => {
-        const now = new Date();
-        const sortedByVotes = [...polls].sort((a, b) => b.totalVotes - a.totalVotes);
-        const sortedByDate = [...polls].sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+loadPolls(): void {
+  this.pollService.getPolls().subscribe({
+    next: (polls: Poll[]) => {
+      const publicPolls = polls.filter(poll => poll.visibility === 'public');
+      const now = new Date();
+      
+      const sortedByDate = [...publicPolls]
+        .sort((a, b) => {
+          const dateA = new Date(a.publishDate).getTime();
+          const dateB = new Date(b.publishDate).getTime();
+          return dateB - dateA; 
+        });
+      
+      const sortedByVotes = [...publicPolls]
+        .sort((a, b) => (b.totalVotes || 0) - (a.totalVotes || 0));
 
-        this.featuredPolls = sortedByVotes.slice(0, 3);
-        this.recentPolls = sortedByDate.slice(0, 3);
-        this.popularPolls = sortedByVotes.slice(3, 6); 
+      this.recentPolls = sortedByDate.slice(0, 3);
+      this.popularPolls = sortedByVotes.slice(0, 3);
+      
 
-       
-      this.visiblePolls = polls
-  .filter(p => p.visibility === 'public')
-  .map(poll => {
-    const totalVotes = poll.options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
+      const featuredCandidates = [...sortedByVotes.slice(0, 2), ...sortedByDate.slice(0, 2)];
+      const featuredMap = new Map<string, Poll>();
+      
+      featuredCandidates.forEach(poll => {
+        if (!featuredMap.has(poll.id!)) {
+          featuredMap.set(poll.id!, poll);
+        }
+      });
+      
 
-    // Sort options by votes and take top 3
-    const topOptions = [...poll.options]
-      .sort((a, b) => (b.votes || 0) - (a.votes || 0))
-      .slice(0, 3)
-      .map(option => ({
-        ...option,
-        percentage: totalVotes > 0
-          ? Math.round((option.votes || 0) * 100 / totalVotes)
-          : 0
-      }));
+      this.featuredPolls = Array.from(featuredMap.values()).slice(0, 3);
+      
 
-    return {
-      ...poll,
-      options: topOptions, // Use only top 3 with percentage
-      isExpired: new Date(poll.expiresAt) < new Date(),
-      hasVoted: false // Replace with actual logic if needed
-    };
+      this.totalPolls = publicPolls.length;
+      this.totalVotes = publicPolls.reduce((acc, p) => acc + (p.totalVotes || 0), 0);
+      this.activePollsCount = publicPolls.filter(p => new Date(p.expiresAt) > now).length;
+      
+      this.visiblePolls = publicPolls.map(poll => {
+        const totalVotes = poll.options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
+
+        const topOptions = [...poll.options]
+          .sort((a, b) => (b.votes || 0) - (a.votes || 0))
+          .slice(0, 3)
+          .map(option => ({
+            ...option,
+            percentage: totalVotes > 0
+              ? Math.round((option.votes || 0) * 100 / totalVotes)
+              : 0
+          }));
+
+        return {
+          ...poll,
+          options: topOptions, 
+          isExpired: new Date(poll.expiresAt) < now,
+          hasVoted: false 
+        };
+      });
+    },
+    error: (err) => {
+      console.error('Error loading polls:', err);
+    }
   });
-
-
-        this.totalVotes = polls.reduce((acc, p) => acc + p.totalVotes, 0);
-        this.activePollsCount = polls.filter(p => new Date(p.expiresAt) > now).length;
-      },
-      error: (err) => {
-        console.error('Error loading polls:', err);
-      }
-    });
-  }
+}
 
   
 }
