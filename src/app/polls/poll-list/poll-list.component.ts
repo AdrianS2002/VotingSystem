@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './poll-list.component.html',
-  styleUrl: './poll-list.component.css'
+  styleUrls: ['./poll-list.component.css', './poll-list-extended.component.css']
 })
 export class PollListComponent implements OnInit {
   @ViewChild('resultsSection') resultsSection!: ElementRef;
@@ -24,7 +24,6 @@ export class PollListComponent implements OnInit {
   error: string | null = null;
 
   searchTerm = '';
-  // Change default to 'active'
   statusFilter = 'active';
   
   currentPage = 1;
@@ -37,7 +36,6 @@ export class PollListComponent implements OnInit {
     const profile = this.authService.currentUserProfile;
     console.log('Profile:', profile);
     
-    // Set authentication status
     this.isAuthenticated = !!profile;
     this.isAdmin = profile?.role === 'admin';
 
@@ -70,7 +68,6 @@ export class PollListComponent implements OnInit {
     const now = new Date();
     console.log('Current date/time:', now);
     
-    // Step 1: Filter by visibility based on user authentication
     let filteredPolls = this.allPolls.filter(poll => {
       // Admin can see all polls
       if (this.isAdmin) {
@@ -95,13 +92,11 @@ export class PollListComponent implements OnInit {
         );
       }
       
-      // Default: not visible
       return false;
     });
     
     console.log('After visibility filtering:', filteredPolls.length);
     
-    // Step 2: Filter by status
     switch (this.statusFilter) {
       case 'active':
         // Active polls: published but not expired
@@ -122,13 +117,11 @@ export class PollListComponent implements OnInit {
         );
         break;
       case 'all':
-        // No additional filtering needed for 'all'
         break;
     }
     
     console.log(`After ${this.statusFilter} status filtering:`, filteredPolls.length);
     
-    // Step 3: Filter by search term
     if (this.searchTerm?.trim()) {
       const term = this.searchTerm.toLowerCase().trim();
       filteredPolls = filteredPolls.filter(poll => 
@@ -136,8 +129,7 @@ export class PollListComponent implements OnInit {
       );
       console.log('After search filtering:', filteredPolls.length);
     }
-    
-    // Update pagination
+
     this.totalPages = Math.max(1, Math.ceil(filteredPolls.length / this.itemsPerPage));
     
     if (this.currentPage > this.totalPages) {
