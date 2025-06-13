@@ -94,17 +94,7 @@ export class HomeComponent implements OnInit {
         }));
 
         const sortedByVotes = [...convertedPolls].sort((a, b) => b.totalVotes - a.totalVotes);
-        const sortedByDate = [...convertedPolls].sort((a, b) => {
-          const dateA = a.createdAt instanceof Date && !isNaN(a.createdAt.getTime())
-            ? a.createdAt.getTime()
-            : a.publishDate.getTime();
 
-          const dateB = b.createdAt instanceof Date && !isNaN(b.createdAt.getTime())
-            ? b.createdAt.getTime()
-            : b.publishDate.getTime();
-
-          return dateB - dateA;
-        });
 
 
         this.featuredPolls = sortedByVotes.slice(0, 3);
@@ -124,6 +114,11 @@ export class HomeComponent implements OnInit {
 
             this.recentPolls = [...this.recentPolls, ...fallback];
           }
+
+          this.popularPolls = [...publicPolls]
+            .sort((a, b) => b.totalVotes - a.totalVotes)
+            .slice(0, 3);
+
         }
 
         console.log('Converted Polls:', convertedPolls.map(p => ({
@@ -137,8 +132,6 @@ export class HomeComponent implements OnInit {
           subject: p.subject,
           createdAt: p.createdAt
         })));
-        this.popularPolls = sortedByVotes.slice(3, 6);
-
         this.visiblePolls = convertedPolls
           .filter(p => p.visibility === 'public')
           .map(poll => {
