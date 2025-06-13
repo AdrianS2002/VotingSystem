@@ -109,12 +109,15 @@ export class HomeComponent implements OnInit {
 
         this.featuredPolls = sortedByVotes.slice(0, 3);
         if (!this.isLoggedIn) {
-          this.recentPolls = convertedPolls
+          const publicPolls = convertedPolls.filter(p => p.visibility === 'public');
+
+          this.recentPolls = publicPolls
             .filter(p => p.createdAt instanceof Date && !isNaN(p.createdAt.getTime()))
             .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())
             .slice(0, 3);
+
           if (this.recentPolls.length < 3) {
-            const fallback = convertedPolls
+            const fallback = publicPolls
               .filter(p => !(p.createdAt instanceof Date) || isNaN(p.createdAt?.getTime()))
               .sort((a, b) => b.publishDate.getTime() - a.publishDate.getTime())
               .slice(0, 3 - this.recentPolls.length);
