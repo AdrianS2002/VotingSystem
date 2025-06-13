@@ -84,14 +84,56 @@ export class HomeComponent implements OnInit {
         const convertedPolls = polls.map(p => ({
           ...p,
           expiresAt: (p.expiresAt as any).toDate ? (p.expiresAt as any).toDate() : new Date(p.expiresAt),
-          publishDate: (p.publishDate as any).toDate ? (p.publishDate as any).toDate() : new Date(p.publishDate)
+          publishDate: (p.publishDate as any).toDate ? (p.publishDate as any).toDate() : new Date(p.publishDate),
+          createdAt: (() => {
+            const raw = (p as any).createdAt;
+            if (raw?.toDate) return raw.toDate();
+            if (typeof raw === 'string' || typeof raw === 'number') return new Date(raw);
+            return null;
+          })()
         }));
 
         const sortedByVotes = [...convertedPolls].sort((a, b) => b.totalVotes - a.totalVotes);
-        const sortedByDate = [...convertedPolls].sort((a, b) => b.publishDate.getTime() - a.publishDate.getTime());
+        const sortedByDate = [...convertedPolls].sort((a, b) => {
+          const dateA = a.createdAt instanceof Date && !isNaN(a.createdAt.getTime())
+            ? a.createdAt.getTime()
+            : a.publishDate.getTime();
+
+          const dateB = b.createdAt instanceof Date && !isNaN(b.createdAt.getTime())
+            ? b.createdAt.getTime()
+            : b.publishDate.getTime();
+
+          return dateB - dateA;
+        });
+
 
         this.featuredPolls = sortedByVotes.slice(0, 3);
-        this.recentPolls = sortedByDate.slice(0, 3);
+        if (!this.isLoggedIn) {
+          this.recentPolls = convertedPolls
+            .filter(p => p.createdAt instanceof Date && !isNaN(p.createdAt.getTime()))
+            .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())
+            .slice(0, 3);
+          if (this.recentPolls.length < 3) {
+            const fallback = convertedPolls
+              .filter(p => !(p.createdAt instanceof Date) || isNaN(p.createdAt?.getTime()))
+              .sort((a, b) => b.publishDate.getTime() - a.publishDate.getTime())
+              .slice(0, 3 - this.recentPolls.length);
+
+            this.recentPolls = [...this.recentPolls, ...fallback];
+          }
+        }
+
+        console.log('Converted Polls:', convertedPolls.map(p => ({
+          subject: p.subject,
+          createdAt: p.createdAt,
+          createdAtValid: p.createdAt instanceof Date && !isNaN(p.createdAt.getTime())
+        })));
+
+
+        console.log('Recent polls:', this.recentPolls.map(p => ({
+          subject: p.subject,
+          createdAt: p.createdAt
+        })));
         this.popularPolls = sortedByVotes.slice(3, 6);
 
         this.visiblePolls = convertedPolls
