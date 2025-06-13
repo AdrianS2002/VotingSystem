@@ -21,4 +21,5 @@ export interface Poll {
   expiresAt: Date;
   totalVotes: number;
   createdBy: string;
+  createdAt?: Date;
 }
