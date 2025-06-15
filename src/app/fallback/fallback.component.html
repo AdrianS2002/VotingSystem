@@ -1,0 +1,88 @@
+<div class="container">
+  <div class="error-container">
+    <div class="error-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    
+    <h1 class="error-title">{{ displayTitle }}</h1>
+    <h2 class="error-subtitle">Something went wrong</h2>
+    
+    <p class="error-description">
+      {{ displayMessage }}
+    </p>
+    
+    <div class="error-actions">
+      <button 
+        *ngIf="showRetry"
+        class="btn btn-primary"
+        [class.loading]="isRetrying"
+        (click)="onRetry()"
+        [disabled]="isRetrying">
+        <i class="fas fa-redo-alt" *ngIf="!isRetrying"></i>
+        {{ isRetrying ? 'Retrying...' : 'Try Again' }}
+      </button>
+      
+      <button 
+        *ngIf="showHome"
+        class="btn btn-secondary"
+        (click)="onGoHome()">
+        <i class="fas fa-home"></i> Go Home
+      </button>
+      
+    
+    </div>
+    
+    <button 
+      class="toggle-details" 
+      (click)="toggleErrorDetails()">
+      {{ showErrorDetails ? 'Hide' : 'Show' }} error details
+    </button>
+    
+    <div 
+      class="error-details" 
+      [class.show]="showErrorDetails">
+      <div class="error-details-header">
+        <strong>Error Information:</strong>
+        <button 
+          class="copy-btn"
+          (click)="copyErrorDetails()"
+          title="Copy error details">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
+      
+      <div class="error-info-grid">
+        <div class="error-info-item">
+          <label>Timestamp:</label>
+          <span>{{ errorInfo.timestamp | date:'medium' }}</span>
+        </div>
+        
+        <div class="error-info-item">
+          <label>Error Code:</label>
+          <span>{{ errorInfo.code || 'Unknown' }}</span>
+        </div>
+        
+        <div class="error-info-item">
+          <label>Session ID:</label>
+          <span>{{ errorInfo.sessionId }}</span>
+        </div>
+        
+        <div class="error-info-item" *ngIf="errorInfo.message">
+          <label>Message:</label>
+          <span>{{ errorInfo.message }}</span>
+        </div>
+      </div>
+      
+      <div class="troubleshooting">
+        <strong>What you can do:</strong>
+        <ul>
+          <li>Check your internet connection</li>
+          <li>Clear your browser cache and cookies</li>
+          <li>Try using a different browser</li>
+          <li>Wait a few minutes and try again</li>
+        </ul>
+        <p>If the problem persists, please contact our support team with the above information.</p>
+      </div>
+    </div>
+  </div>
+</div>
