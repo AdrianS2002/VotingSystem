@@ -24,8 +24,22 @@
 <div class="container">
   <!-- Section Header -->
   <div class="section-header">
-    <h2 class="section-title">Active Polls</h2>
-    <p class="section-subtitle">Explore current topics and make your voice heard</p>
+    <h2 class="section-title">
+      <ng-container [ngSwitch]="statusFilter">
+        <ng-container *ngSwitchCase="'active'">Active Polls</ng-container>
+        <ng-container *ngSwitchCase="'future'">Upcoming Polls</ng-container>
+        <ng-container *ngSwitchCase="'past'">Past Polls</ng-container>
+        <ng-container *ngSwitchCase="'all'">All Polls</ng-container>
+      </ng-container>
+    </h2>
+    <p class="section-subtitle">
+      <ng-container [ngSwitch]="statusFilter">
+        <ng-container *ngSwitchCase="'active'">Currently open polls ready for your vote</ng-container>
+        <ng-container *ngSwitchCase="'future'">Polls that will open soon</ng-container>
+        <ng-container *ngSwitchCase="'past'">Polls that have already ended</ng-container>
+        <ng-container *ngSwitchCase="'all'">All available polls</ng-container>
+      </ng-container>
+    </p>
   </div>
 
   <!-- Stats Grid (optional: bind values dynamically later) -->
@@ -42,9 +56,10 @@
       <div class="filter-group">
         <label for="status-filter">Poll Status:</label>
         <select id="status-filter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
-          <option value="all">All</option>
           <option value="active">Active</option>
-          <option value="expired">Expired</option>
+          <option value="future">Upcoming</option>
+          <option value="past">Past</option>
+          <option value="all">All</option>
         </select>
       </div>
     </div>
@@ -81,20 +96,34 @@
   <div *ngIf="!isLoading && polls.length > 0" class="polls-grid" #resultsSection>
     <div *ngFor="let poll of polls" class="poll-card">
       <h3>{{ poll.subject }}</h3>
-      <span class="badge" [ngClass]="poll.visibility">{{ poll.visibility }}</span>
-      <p>Total votes: {{ poll.totalVotes }}</p>
+      
+      <div class="poll-badges">
+        <!-- Visibility badge -->
+        <span class="badge visibility-badge" [ngClass]="poll.visibility">{{ poll.visibility }}</span>
+        
+        <!-- Status badge -->
+        <span *ngIf="!isPollPublished(poll)" class="badge status-badge future">Upcoming</span>
+        <span *ngIf="isPollActive(poll)" class="badge status-badge active">Active</span>
+        <span *ngIf="isPollExpired(poll)" class="badge status-badge expired">Expired</span>
+      </div>
+      
+      <p>Total votes: {{ poll.totalVotes || 0 }}</p>
 
       <div class="poll-info">
         <div class="poll-info-item">
-          <span>📅 Created: {{ formatDate(poll.publishDate) }}</span>
+          <span>📅 Starts: {{ formatDate(poll.publishDate) }} <span class="time">{{ formatTime(poll.publishDate) }}</span></span>
         </div>
         <div class="poll-info-item">
-          <span>⏰ Expires: {{ formatDate(poll.expiresAt) }}</span>
+          <span>⏰ Expires: {{ formatDate(poll.expiresAt) }} <span class="time">{{ formatTime(poll.expiresAt) }}</span></span>
         </div>
       </div>
 
       <div class="poll-actions">
-        <a [routerLink]="['/polls', poll.id]" class="btn-sm">Vote Now</a>
+        <!-- Conditionally disable vote button based on poll status -->
+        <a *ngIf="isPollActive(poll)" [routerLink]="['/polls', poll.id]" class="btn-sm">Vote Now</a>
+        <span *ngIf="!isPollPublished(poll)" class="btn-sm disabled">Not Started</span>
+        <span *ngIf="isPollExpired(poll)" class="btn-sm disabled">Voting Closed</span>
+        
         <a [routerLink]="['/polls', poll.id, 'results']" class="btn-sm">View Results</a>
       </div>
     </div>
