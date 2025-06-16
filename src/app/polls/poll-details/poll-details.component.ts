@@ -23,6 +23,7 @@ export class PollDetailsComponent implements OnInit {
   isLoading: boolean = true;
   error: string | null = null;
   userEmail: string = '';
+  isExpired: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -33,101 +34,167 @@ export class PollDetailsComponent implements OnInit {
     private authService: AuthService
   ) { }
 
-  async ngOnInit() {
-    this.isLoading = true;
-    try {
-      this.pollId = this.route.snapshot.paramMap.get('id') || '';
-      if (!this.pollId) throw new Error('Poll ID is required');
+async ngOnInit() {
+  this.isLoading = true;
+  try {
+    this.pollId = this.route.snapshot.paramMap.get('id') || '';
+    if (!this.pollId) throw new Error('Poll ID is required');
 
-      const pollDoc = await getDoc(doc(this.firestore, `polls/${this.pollId}`));
-      if (!pollDoc.exists()) throw new Error('Poll not found');
+    const pollDoc = await getDoc(doc(this.firestore, `polls/${this.pollId}`));
+    if (!pollDoc.exists()) throw new Error('Poll not found');
 
-      this.poll = { id: pollDoc.id, ...pollDoc.data() } as Poll;
+    this.poll = { id: pollDoc.id, ...pollDoc.data() } as Poll;
 
     const isAdmin = this.authService.currentUserProfile?.role === 'admin';
     const now = new Date();
     const publishDate = this.getDateObject(this.poll.publishDate);
     
+    // Check if poll is scheduled for the future
     if (!isAdmin && publishDate > now) {
       this.error = 'This poll is not yet available.';
       this.router.navigate(['/polls']);
       return;
     }
 
-      const userId = await this.getVoterId();
-      const voteQuery = query(
-        collection(this.firestore, 'votes'),
-        where('pollId', '==', this.pollId),
-        where('userId', '==', userId)
-      );
-      const voteSnap = await getDocs(voteQuery);
-      if (!voteSnap.empty) {
-        this.hasVoted = true;
-        this.selectedOption = voteSnap.docs[0].data()['optionId'];
+    // Check if poll has expired
+    const expiryDate = this.getDateObject(this.poll.expiresAt);
+    if (now > expiryDate) {
+      this.isExpired = true;
+      this.error = 'This poll has expired and is no longer accepting votes.';
+      console.log("Poll has expired");
+      
+      if(!isAdmin){
+        this.error = null
+      }
+    }
+
+    // Check visibility restrictions
+    if (this.poll.visibility === 'registered') {
+      // For 'registered' visibility,
+      if (!this.authService.currentUserProfile) {
+        this.error = 'This poll requires you to be logged in to view and vote.';
+        this.router.navigate(['/login'], { 
+          queryParams: { redirectTo: `/polls/${this.pollId}` } 
+        });
+        return;
+      }
+    } 
+    else if (this.poll.visibility === 'private' && this.poll.allowedVoters?.length) {
+      // For 'private' visibility, user must be in the allowedVoters list
+      const user = this.authService.currentUserProfile;
+      if (!user || !user.email) {
+        this.error = 'This poll is private. Please sign in with the email address you received the invitation with.';
+        this.router.navigate(['/login'], { 
+          queryParams: { redirectTo: `/polls/${this.pollId}` } 
+        });
+        return;
       }
 
-    } catch (error) {
-      console.error('Error loading poll:', error);
-      this.error = 'Failed to load poll details.';
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  async submitVote() {
-    if (!this.selectedOption) {
-      this.error = 'Please select an option to vote.';
-      return;
-    }
-
-    if (!this.poll) {
-      this.error = 'Poll data is missing.';
-      return;
-    }
-
-    if (this.poll.visibility === 'private' && this.poll.allowedVoters?.length) {
       const normalizedEmails = this.poll.allowedVoters.map(email => email.trim().toLowerCase());
-      const currentEmail = this.userEmail.trim().toLowerCase();
+      const currentEmail = user.email.trim().toLowerCase();
 
       if (!normalizedEmails.includes(currentEmail)) {
-        this.error = 'You are not allowed to vote in this private poll.';
+        this.error = 'You do not have permission to access this private poll.';
         return;
       }
     }
 
-    this.isLoading = true;
-
-    try {
-      const selected = this.poll.options.find(opt => opt.id === this.selectedOption);
-      if (!selected) throw new Error('Selected option not found');
-      await new Promise<void>((resolve, reject) => {
-        this.voteService.vote(this.pollId, selected.id, selected.text)
-          .subscribe({
-            next: () => resolve(),
-            error: (err) => reject(err)
-          });
-      });
-      
-      const pollRef = doc(this.firestore, `polls/${this.pollId}`);
-      await setDoc(pollRef, {
-        totalVotes: (this.poll.totalVotes || 0) + 1
-      }, { merge: true });
-
+    // Check if the user has already voted
+    const userId = await this.getVoterId();
+    const voteQuery = query(
+      collection(this.firestore, 'votes'),
+      where('pollId', '==', this.pollId),
+      where('userId', '==', userId)
+    );
+    const voteSnap = await getDocs(voteQuery);
+    if (!voteSnap.empty) {
       this.hasVoted = true;
+      this.selectedOption = voteSnap.docs[0].data()['optionId'];
+    }
 
-      if (this.poll.resultsVisibility === 'live') {
-        setTimeout(() => {
-          this.router.navigate(['/polls', this.pollId, 'results']);
-        }, 1500);
-      }
+  } catch (error) {
+    console.error('Error loading poll:', error);
+    this.error = 'Failed to load poll details.';
+  } finally {
+    this.isLoading = false;
+  }
+}
 
-    } catch (error: any) {
-      console.error('Vote error:', error);
-      this.error = error.message || 'Failed to submit your vote.';
-    } finally {
-      this.isLoading = false;
+async submitVote() {
+  if (!this.selectedOption) {
+    this.error = 'Please select an option to vote.';
+    return;
+  }
+
+  if (!this.poll) {
+    this.error = 'Poll data is missing.';
+    return;
+  }
+
+  // Check if poll has expired
+  const now = new Date();
+  const expiryDate = this.getDateObject(this.poll.expiresAt);
+  if (now > expiryDate) {
+    this.error = 'This poll has expired and is no longer accepting votes.';
+    return;
+  }
+
+  // Check visibility permissions
+  if (this.poll.visibility === 'registered') {
+    if (!this.authService.currentUserProfile) {
+      this.error = 'You must be logged in to vote in this poll.';
+      return;
     }
   }
+  else if (this.poll.visibility === 'private' && this.poll.allowedVoters?.length) {
+    const user = this.authService.currentUserProfile;
+    if (!user || !user.email) {
+      this.error = 'You must be logged in with the invited email to vote in this poll.';
+      return;
+    }
+
+    const normalizedEmails = this.poll.allowedVoters.map(email => email.trim().toLowerCase());
+    const currentEmail = user.email.trim().toLowerCase();
+
+    if (!normalizedEmails.includes(currentEmail)) {
+      this.error = 'You are not authorized to vote in this private poll.';
+      return;
+    }
+  }
+
+  this.isLoading = true;
+
+  try {
+    // Rest of your existing voting code
+    const selected = this.poll.options.find(opt => opt.id === this.selectedOption);
+    if (!selected) throw new Error('Selected option not found');
+    await new Promise<void>((resolve, reject) => {
+      this.voteService.vote(this.pollId, selected.id, selected.text)
+        .subscribe({
+          next: () => resolve(),
+          error: (err) => reject(err)
+        });
+    });
+    
+    const pollRef = doc(this.firestore, `polls/${this.pollId}`);
+    await setDoc(pollRef, {
+      totalVotes: (this.poll.totalVotes || 0) + 1
+    }, { merge: true });
+
+    this.hasVoted = true;
+
+    if (this.poll.resultsVisibility === 'live') {
+      setTimeout(() => {
+        this.router.navigate(['/polls', this.pollId, 'results']);
+      }, 1500);
+    }
+  } catch (error: any) {
+    console.error('Vote error:', error);
+    this.error = error.message || 'Failed to submit your vote.';
+  } finally {
+    this.isLoading = false;
+  }
+}
 
   private async getVoterId(): Promise<string> {
 
@@ -167,5 +234,32 @@ export class PollDetailsComponent implements OnInit {
   }
 
   return new Date(date);
+}
+
+protected formatFirestoreDate(date: any): Date | null {
+  if (!date) return null;
+  
+  // For Firestore Timestamp objects
+  if (date && typeof date.toDate === 'function') {
+    return date.toDate();
+  }
+  
+  // For string dates
+  if (typeof date === 'string') {
+    const parsed = new Date(date);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  }
+  
+  // For Date objects
+  if (date instanceof Date) {
+    return date;
+  }
+  
+  // For numeric timestamps
+  if (typeof date === 'number') {
+    return new Date(date);
+  }
+  
+  return null;
 }
 }
