@@ -36,7 +36,8 @@ export class PollService {
           publishDate: poll.publishDate,
           expiresAt: poll.expiresAt,
           totalVotes: 0,
-          createdBy: userId
+          createdBy: userId,
+          createdAt: new Date()
         }));
       })
     );
