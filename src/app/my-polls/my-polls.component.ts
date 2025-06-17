@@ -65,4 +65,19 @@ export class MyPollsComponent implements OnInit {
       this.router.navigate(['/polls', pollId]);
     }
   }
+
+  onDeletePoll(pollId: string): void {
+  if (confirm('Are you sure you want to delete this poll?')) {
+    this.pollService.deletePoll(pollId).subscribe({
+      next: () => {
+        this.myPolls = this.myPolls.filter(p => p.id !== pollId);
+        console.log('Poll deleted successfully.');
+      },
+      error: err => {
+        console.error('Failed to delete poll:', err);
+      }
+    });
+  }
+}
+
 }
