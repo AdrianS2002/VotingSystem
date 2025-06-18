@@ -1,0 +1,91 @@
+<div class="poll-create-container">
+  <h2>Editează sondajul</h2>
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <form (ngSubmit)="updatePoll()">
+    <div class="form-section">
+      <div class="subject-field">
+        <label for="subject-input">Subiect:</label>
+        <input 
+          id="subject-input"
+          [(ngModel)]="poll.subject" 
+          name="subject" 
+          required 
+          placeholder="Introduceți subiectul sondajului"
+          autocomplete="off">
+      </div>
+
+      <label>Opțiuni:</label>
+      <div *ngFor="let option of poll.options; let i = index" class="option-container">
+        <input 
+          [(ngModel)]="option.text" 
+          [name]="'option' + i" 
+          required 
+          placeholder="Opțiunea {{i+1}}">
+        <button type="button" class="remove-option" (click)="removeOption(i)">X</button>
+      </div>
+      <button type="button" class="add-option" (click)="addOption()">+ Adaugă opțiune</button>
+    </div>
+
+    <div class="form-section">
+      <div class="section-title">Setări de vizibilitate</div>
+
+      <label>Vizibilitate:</label>
+      <select [(ngModel)]="poll.visibility" name="visibility">
+        <option value="public">Public</option>
+        <option value="registered">Utilizatori înregistrați</option>
+        <option value="private">Anumite persoane</option>
+      </select>
+
+      <div *ngIf="poll.visibility === 'private'" class="private-voters">
+        <label>Emailuri votanți (separate prin virgulă):</label>
+        <input [(ngModel)]="voterEmails" name="voterEmails" placeholder="email1@example.com, email2@example.com">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-title">Setări de rezultate</div>
+
+      <label>Reguli afișare rezultate:</label>
+      <select [(ngModel)]="poll.resultsVisibility" name="resultsVisibility">
+        <option value="live">Live</option>
+        <option value="after100Votes">După 100 voturi</option>
+        <option value="afterExpiration">După expirare</option>
+        <option value="afterAllVoted">După ce toți au votat</option>
+      </select>
+    </div>
+
+    <div class="form-section">
+      <div class="section-title">Perioadă</div>
+
+      <div class="form-group">
+        <label>Dată publicare:</label>
+        <input 
+          type="datetime-local" 
+          [(ngModel)]="publishDateLocal" 
+          name="publishDate"
+          (change)="dateValidation = validateDates()">
+      </div>
+
+      <div class="form-group">
+        <label>Dată expirare:</label>
+        <input 
+          type="datetime-local" 
+          [(ngModel)]="expiresAtLocal" 
+          name="expiresAt"
+          (change)="dateValidation = validateDates()">
+      </div>
+
+      <div 
+        *ngIf="dateValidation && !dateValidation.valid" 
+        class="validation-error">
+        {{ dateValidation.message }}
+      </div>
+    </div>
+
+    <button type="submit">Salvează modificările</button>
+  </form>
+</div>

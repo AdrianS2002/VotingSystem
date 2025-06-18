@@ -79,6 +79,43 @@
   transition: var(--transition);
 }
 
+.btn-edit{
+  background-color: var(--primary-color);
+  color: var(--light-text);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+
+}
+
+.btn-edit:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background-color: #f44336;
+  color: var(--light-text);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-delete:hover {
+  background-color: #d32f2f;
+  transform: translateY(-2px);
+}
+
 .btn-outline:hover {
   background-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
@@ -159,8 +196,22 @@
 
 .vote-actions {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.vote-actions a,
+.vote-actions button {
+  flex: 1 1 0;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+  text-align: center;
+  min-width: auto;
 }
 
 .vote-card.compact {

@@ -23,7 +23,7 @@ export class MyPollsComponent implements OnInit {
     private pollService: PollService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const profile = this.authService.currentUserProfile;
@@ -38,7 +38,19 @@ export class MyPollsComponent implements OnInit {
     this.isLoading = true;
     this.pollService.getPolls().subscribe({
       next: (polls: Poll[]) => {
-        this.myPolls = polls.filter(p => p.createdBy === userId);
+        this.myPolls = polls
+          .filter(p => p.createdBy === userId)
+          .map(p => ({
+            ...p,
+            expiresAt: (p.expiresAt as any).toDate ? (p.expiresAt as any).toDate() : new Date(p.expiresAt),
+            publishDate: (p.publishDate as any).toDate ? (p.publishDate as any).toDate() : new Date(p.publishDate),
+            createdAt: (() => {
+              const raw = (p as any).createdAt;
+              if (raw?.toDate) return raw.toDate();
+              if (typeof raw === 'string' || typeof raw === 'number') return new Date(raw);
+              return null;
+            })()
+          }));
         this.isLoading = false;
       },
       error: (err) => {
@@ -53,4 +65,19 @@ export class MyPollsComponent implements OnInit {
       this.router.navigate(['/polls', pollId]);
     }
   }
+
+  onDeletePoll(pollId: string): void {
+  if (confirm('Are you sure you want to delete this poll?')) {
+    this.pollService.deletePoll(pollId).subscribe({
+      next: () => {
+        this.myPolls = this.myPolls.filter(p => p.id !== pollId);
+        console.log('Poll deleted successfully.');
+      },
+      error: err => {
+        console.error('Failed to delete poll:', err);
+      }
+    });
+  }
+}
+
 }

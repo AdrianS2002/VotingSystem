@@ -14,19 +14,11 @@
     </div>
 
     <div class="polls-grid" *ngIf="myPolls.length > 0">
-      <div
-        class="vote-card"
-        *ngFor="let poll of myPolls"
-        [ngClass]="{ 'disabled-card': poll.expiresAt < today }"
-      >
+      <div class="vote-card" *ngFor="let poll of myPolls" [ngClass]="{ 'disabled-card': poll.expiresAt < today }">
         <div class="vote-header">
           <h3 class="vote-title">{{ poll.subject }}</h3>
-          <span
-            class="vote-status"
-            [ngClass]="poll.expiresAt < today ? 'status-ended' : 'status-active'"
-          >
-            {{ poll.expiresAt < today ? 'Expired' : 'Active' }}
-          </span>
+          <span class="vote-status" [ngClass]="poll.expiresAt < today ? 'status-ended' : 'status-active'">
+            {{ poll.expiresAt < today ? 'Expired' : 'Active' }} </span>
         </div>
 
         <p class="vote-description">
@@ -46,6 +38,8 @@
         <div class="vote-actions">
           <a [routerLink]="['/polls', poll.id]" class="btn btn-primary">View Poll</a>
           <a [routerLink]="['/polls', poll.id, 'results']" class="btn-results">See Results</a>
+          <a [routerLink]="['/polls', poll.id, 'edit']" class="btn-edit">Edit</a>
+          <button (click)="onDeletePoll(poll.id!)" class="btn-delete">Delete</button>
         </div>
       </div>
     </div>
