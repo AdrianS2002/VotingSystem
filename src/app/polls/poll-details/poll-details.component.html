@@ -1,23 +1,52 @@
 <div class="container">
+  <!-- Loading state -->
   <div *ngIf="isLoading" class="loading">
     <p>Loading poll...</p>
   </div>
 
+  <!-- Error state -->
   <div *ngIf="error" class="error-message">
     <p>{{ error }}</p>
     <button (click)="ngOnInit()" class="btn btn-retry">Try Again</button>
+    <a routerLink="/polls" class="btn btn-link">Back to Polls</a>
   </div>
 
+  <!-- Poll content -->
   <div *ngIf="!isLoading && !error && poll" class="poll-container">
+    <!-- Poll header -->
     <h2>{{ poll.subject }}</h2>
     
-    <div class="poll-info">
-      <span class="badge" [ngClass]="poll.visibility">{{ poll.visibility }}</span>
-      <span class="votes-count">{{ poll.totalVotes }} votes</span>
-      <span class="expiry">Expires: {{ poll.expiresAt | date:'medium' }}</span>
+    <!-- Poll status badges -->
+    <div class="poll-badges">
+      <span class="badge visibility-badge" [ngClass]="poll.visibility">{{ poll.visibility }}</span>
+      <span *ngIf="isExpired" class="badge status-badge expired">Expired</span>
     </div>
-
-    <form *ngIf="!hasVoted" (ngSubmit)="submitVote()" class="vote-form">
+    
+    <!-- Poll info -->
+    <div class="poll-info">
+      <div class="poll-info-item">
+        <span class="votes-count">{{ poll.totalVotes || 0 }} votes</span>
+      </div>
+      <div class="poll-info-item">
+        <span class="publish-date">
+          Published: {{ formatFirestoreDate(poll.publishDate) | date:'medium' }}
+        </span>
+      </div>
+      <div class="poll-info-item">
+        <span class="expiry" [class.expired]="isExpired">
+          {{ isExpired ? 'Expired' : 'Expires' }}: {{ formatFirestoreDate(poll.expiresAt) | date:'medium' }}
+        </span>
+      </div>
+    </div>
+    
+    <!-- Expired banner -->
+    <div *ngIf="isExpired" class="expired-banner">
+      <i class="fa fa-clock"></i>
+      <span>This poll has expired and is no longer accepting votes</span>
+    </div>
+    
+    <!-- Voting form - only shown for non-expired polls and when user hasn't voted yet -->
+    <form *ngIf="!hasVoted && !isExpired" (ngSubmit)="submitVote()" class="vote-form">
       <div class="options-list">
         <div *ngFor="let option of poll.options" class="option">
           <label class="option-label">
@@ -35,6 +64,20 @@
       </div>
     </form>
 
+    <!-- Expired message shown instead of form -->
+    <div *ngIf="!hasVoted && isExpired" class="expired-message">
+      <h3>Poll Expired</h3>
+      <p>This poll closed on {{ formatFirestoreDate(poll.expiresAt) | date:'medium' }} and is no longer accepting votes.</p>
+      
+      <div class="expired-actions">
+        <a [routerLink]="['/polls', pollId, 'results']" class="btn btn-primary">
+          View Results
+        </a>
+        <a routerLink="/polls" class="btn btn-link">Back to Polls</a>
+      </div>
+    </div>
+
+    <!-- Success message shown after voting -->
     <div *ngIf="hasVoted" class="vote-success">
       <div class="success-message">
         <h3>Thank you for voting!</h3>

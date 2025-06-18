@@ -11,9 +11,11 @@ export const routes: Routes = [
     path: 'auth',
     loadComponent: () => import('./auth/auth.component').then(m => m.AuthComponent)
   },
+
   {
     path: 'polls/create',
     loadComponent: () => import('./polls/poll-create/poll-create.component').then(m => m.PollCreateComponent), canActivate: [AuthGuard]
+
   },
   {
     path: 'polls/:id/results',
@@ -36,4 +38,20 @@ export const routes: Routes = [
     loadComponent: () => import('./polls/poll-list/poll-list.component').then(m => m.PollListComponent)
   },
   { path: 'about', component: LearnMoreComponent },
+  
+  // 404 Error Route - Must be last!
+  { 
+    path: '**', 
+    loadComponent: () => import('./fallback/fallback.component').then(m => m.ErrorFallbackComponent),
+    data: { 
+      errorInfo: { 
+        code: 404, 
+        message: 'Page not found' 
+      },
+      customTitle: '404',
+      customMessage: 'The page you are looking for does not exist. It might have been moved, deleted, or you entered the wrong URL.',
+      showRetry: false // Don't show retry for 404s
+    }
+  }
+
 ];
