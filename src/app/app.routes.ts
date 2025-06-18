@@ -34,7 +34,7 @@ export const routes: Routes = [
   },
   { path: 'about', component: LearnMoreComponent },
   
-  // 404 Error Route - Must be last!
+
   { 
     path: '**', 
     loadComponent: () => import('./fallback/fallback.component').then(m => m.ErrorFallbackComponent),
@@ -45,7 +45,7 @@ export const routes: Routes = [
       },
       customTitle: '404',
       customMessage: 'The page you are looking for does not exist. It might have been moved, deleted, or you entered the wrong URL.',
-      showRetry: false // Don't show retry for 404s
+      showRetry: false 
     }
   }
 ];
