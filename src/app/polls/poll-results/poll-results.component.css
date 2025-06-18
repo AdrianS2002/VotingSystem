@@ -364,6 +364,31 @@ canvas:hover {
   transform: scale(1.02);
 }
 
+.badge.live-status {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.badge.live-status.live {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge.live-status.final {
+  background-color: #6c757d;
+  color: white;
+}
+
+.waiting-msg {
+  font-style: italic;
+  color: #777;
+  padding: 1rem;
+  text-align: center;
+}
+
+
 /* Animations */
 @keyframes fadeInUp {
   from {
