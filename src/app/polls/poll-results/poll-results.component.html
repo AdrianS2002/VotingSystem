@@ -17,30 +17,43 @@
       <span class="expiry">{{ isPollActive() ? 'Closes' : 'Closed' }}: {{ formatDate(poll.expiresAt) }}</span>
     </div>
 
-    <div class="results-chart">
-      <div *ngFor="let option of poll.resultOptions; let i = index" class="result-item">
-        <div class="result-bar-container">
-          <div class="result-bar" [style.width.%]="option.percentage" [style.backgroundColor]="getColorForIndex(i)">
-            <span class="bar-label">
-              {{ option.text }} – {{ option.votes }} votes ({{ option.percentage }}%)
-            </span>
+    <ng-container *ngIf="shouldShowResults(); else waitingMessage">
+      <div class="results-chart">
+        <div *ngFor="let option of poll.resultOptions; let i = index" class="result-item">
+          <div class="result-bar-container">
+            <div class="result-bar" [style.width.%]="option.percentage" [style.backgroundColor]="getColorForIndex(i)">
+              <span class="bar-label">
+                {{ option.text }} – {{ option.votes }} votes ({{ option.percentage }}%)
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div *ngIf="totalVotes === 0" class="no-votes">
-        <p>No votes have been cast yet for this poll.</p>
+        <div *ngIf="totalVotes === 0" class="no-votes">
+          <p>No votes have been cast yet for this poll.</p>
+        </div>
       </div>
-    </div>
+    </ng-container>
+
+    <ng-template #waitingMessage>
+      <div class="waiting-info">
+        <p>
+          Results will be visible
+          <span *ngIf="poll?.resultsVisibility === 'afterExpiration'">after the poll closes.</span>
+          <span *ngIf="poll?.resultsVisibility === 'after100Votes'">after 100 votes are received.</span>
+          <span *ngIf="poll?.resultsVisibility === 'afterAllVoted'">once all assigned users have voted.</span>
+        </p>
+      </div>
+    </ng-template>
 
     <div class="actions">
       <a [routerLink]="['/polls', pollId]" class="btn btn-primary">Back to Poll</a>
       <a routerLink="/polls" class="btn btn-outline">All Polls</a>
     </div>
   </div>
+
   <div class="chart-block" *ngIf="votedChartData">
     <h3>Participation Rate</h3>
-    <canvas baseChart [data]="votedChartData" [options]="votedChartOptions" [type]="'pie'">
-    </canvas>
+    <canvas baseChart [data]="votedChartData" [options]="votedChartOptions" [type]="'pie'"></canvas>
   </div>
 </div>
