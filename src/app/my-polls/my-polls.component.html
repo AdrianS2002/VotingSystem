@@ -1,47 +1,246 @@
-<div class="container main-content">
-  <section class="polls-section">
-    <div class="section-header">
-      <h2 class="section-title">My Created Polls</h2>
+<div class="profile-container">
+  <!-- Profile Header Section -->
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <div *ngIf="!profilePicture" class="initial-avatar">{{ username.charAt(0) }}</div>
     </div>
-
-    <div *ngIf="isLoading">
-      <p>Loading your polls...</p>
+    
+    <div class="profile-info">
+      <h1>{{ username }}</h1>
+      <p class="profile-email">{{ userEmail }}</p>
     </div>
-
-    <div *ngIf="!isLoading && myPolls.length === 0">
-      <p>You haven't created any polls yet.</p>
-      <a routerLink="/polls/create" class="btn btn-primary">Start by Creating One</a>
+    
+    <div class="profile-actions">
+      <a routerLink="/polls/create" class="btn-create">Create New Poll</a>
     </div>
-
-    <div class="polls-grid" *ngIf="myPolls.length > 0">
-      <div class="vote-card" *ngFor="let poll of myPolls" [ngClass]="{ 'disabled-card': poll.expiresAt < today }">
-        <div class="vote-header">
-          <h3 class="vote-title">{{ poll.subject }}</h3>
-          <span class="vote-status" [ngClass]="poll.expiresAt < today ? 'status-ended' : 'status-active'">
-            {{ poll.expiresAt < today ? 'Expired' : 'Active' }} </span>
-        </div>
-
-        <p class="vote-description">
-          {{ poll.description || 'No description provided.' }}
-        </p>
-
-        <div class="vote-info">
-          <div class="vote-info-item">
-            <i class="fas fa-users"></i> {{ poll.totalVotes }} Votes
+  </div>
+  
+  <!-- Stats Cards Section -->
+  <div class="stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-icon">
+        <i class="fa fa-poll"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ totalPolls }}</span>
+        <span class="stat-label">Total Polls</span>
+      </div>
+    </div>
+    
+    <div class="stat-card success">
+      <div class="stat-icon">
+        <i class="fa fa-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ totalVotes }}</span>
+        <span class="stat-label">Total Votes</span>
+      </div>
+    </div>
+    
+    <div class="stat-card info">
+      <div class="stat-icon">
+        <i class="fa fa-chart-line"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ avgVotesPerPoll }}</span>
+        <span class="stat-label">Avg. Votes per Poll</span>
+      </div>
+    </div>
+    
+    <div class="stat-card warning">
+      <div class="stat-icon">
+        <i class="fa fa-clock"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ activePolls }}</span>
+        <span class="stat-label">Active Polls</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Activity Overview Section -->
+  <div class="activity-section">
+    <div class="section-title">
+      <h2>Activity Overview</h2>
+      <div class="section-divider"></div>
+    </div>
+    
+    <div class="activity-grid">
+      <div class="activity-card">
+        <h3>Poll Status</h3>
+        <div class="activity-chart">
+          <div class="status-bar">
+            <div class="status-segment active" [style.width.%]="(activePolls / totalPolls) * 100" *ngIf="activePolls > 0">
+              {{ activePolls }}
+            </div>
+            <div class="status-segment upcoming" [style.width.%]="(upcomingPolls / totalPolls) * 100" *ngIf="upcomingPolls > 0">
+              {{ upcomingPolls }}
+            </div>
+            <div class="status-segment expired" [style.width.%]="(expiredPolls / totalPolls) * 100" *ngIf="expiredPolls > 0">
+              {{ expiredPolls }}
+            </div>
           </div>
-          <div class="vote-info-item">
-            <i class="fas fa-calendar-alt"></i>
-            Ends {{ poll.expiresAt | date: 'mediumDate' }}
+          <div class="status-legend">
+            <div class="legend-item">
+              <span class="legend-color active"></span>
+              <span class="legend-label">Active</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color upcoming"></span>
+              <span class="legend-label">Upcoming</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color expired"></span>
+              <span class="legend-label">Expired</span>
+            </div>
           </div>
         </div>
-
-        <div class="vote-actions">
-          <a [routerLink]="['/polls', poll.id]" class="btn btn-primary">View Poll</a>
-          <a [routerLink]="['/polls', poll.id, 'results']" class="btn-results">See Results</a>
-          <a [routerLink]="['/polls', poll.id, 'edit']" class="btn-edit">Edit</a>
-          <button (click)="onDeletePoll(poll.id!)" class="btn-delete">Delete</button>
+      </div>
+      
+      <div class="activity-card">
+        <h3>Poll Visibility</h3>
+        <div class="visibility-stats">
+          <div class="visibility-item">
+            <span class="visibility-label public">Public</span>
+            <span class="visibility-count">{{ getPollsCountByVisibility('public') }}</span>
+          </div>
+          <div class="visibility-item">
+            <span class="visibility-label registered">Registered</span>
+            <span class="visibility-count">{{ getPollsCountByVisibility('registered') }}</span>
+          </div>
+          <div class="visibility-item">
+            <span class="visibility-label private">Private</span>
+            <span class="visibility-count">{{ getPollsCountByVisibility('private') }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="activity-card highlight" *ngIf="mostVotedPoll">
+        <h3>Most Popular Poll</h3>
+        <div class="highlight-content">
+          <h4>{{ mostVotedPoll.subject }}</h4>
+          <p>{{ mostVotedPoll.totalVotes || 0 }} total votes</p>
+          <a [routerLink]="['/polls', mostVotedPoll.id, 'results']" class="btn-view">
+            View Results
+          </a>
+        </div>
+      </div>
+      
+      <div class="activity-card highlight" *ngIf="recentPoll">
+        <h3>Most Recent Poll</h3>
+        <div class="highlight-content">
+          <h4>{{ recentPoll.subject }}</h4>
+          <p>Created on {{ formatDate(recentPoll.createdAt) }}</p>
+          <a [routerLink]="['/polls', recentPoll.id]" class="btn-view">
+            View Poll
+          </a>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+  
+  <!-- My Polls Section -->
+  <div class="my-polls-section">
+    <div class="section-title">
+      <h2>My Polls</h2>
+      <div class="section-divider"></div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filters-container">
+      <div class="filter-group">
+        <label for="status-filter">Status:</label>
+        <select id="status-filter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+          <option value="all">All Polls</option>
+          <option value="active">Active</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="sort-filter">Sort by:</label>
+        <select id="sort-filter" [(ngModel)]="sortFilter" (change)="onSortFilterChange()">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="most-votes">Most Votes</option>
+          <option value="least-votes">Least Votes</option>
+          <option value="ending-soon">Ending Soon</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading your polls...</p>
+    </div>
+    
+    <!-- No polls state -->
+    <div *ngIf="!isLoading && filteredPolls.length === 0" class="empty-state">
+      <div class="empty-content">
+        <i class="fa fa-poll fa-3x"></i>
+        <h3>No polls found</h3>
+        <p *ngIf="myPolls.length === 0">You haven't created any polls yet.</p>
+        <p *ngIf="myPolls.length > 0">No polls match the current filter.</p>
+        <a routerLink="/polls/create" class="btn-primary">Create Your First Poll</a>
+      </div>
+    </div>
+
+
+    <!-- Polls list -->
+    <div *ngIf="!isLoading && filteredPolls.length > 0" class="polls-grid">
+      <div *ngFor="let poll of filteredPolls" class="poll-card">
+        <div class="poll-status" [ngClass]="getStatusClass(poll)">
+          <span *ngIf="!isPollPublished(poll)">Upcoming</span>
+          <span *ngIf="isPollActive(poll)">Active</span>
+          <span *ngIf="isPollExpired(poll)">Expired</span>
+        </div>
+        
+        <h3>{{ poll.subject }}</h3>
+        
+        <div class="poll-badges">
+          <span class="badge" [ngClass]="poll.visibility">
+            {{ poll.visibility }}
+          </span>
+          <span class="badge votes">
+            {{ poll.totalVotes || 0 }} votes
+          </span>
+        </div>
+        
+        <div class="poll-time-info">
+          <div class="time-remaining" [ngClass]="getStatusClass(poll)">
+            <i class="fa fa-clock"></i>
+            <span>{{ getTimeRemaining(poll) }}</span>
+          </div>
+        </div>
+        
+        <div class="poll-dates">
+          <div class="date-item">
+            <i class="fa fa-calendar-plus"></i>
+            <span>Start: {{ formatDate(poll.publishDate) }} <span class="time">{{ formatTime(poll.publishDate) }}</span></span>
+          </div>
+          <div class="date-item">
+            <i class="fa fa-calendar-times"></i>
+            <span>End: {{ formatDate(poll.expiresAt) }} <span class="time">{{ formatTime(poll.expiresAt) }}</span></span>
+          </div>
+        </div>
+
+        <div class="poll-actions">
+          <a [routerLink]="['/polls', poll.id]" class="action-btn view">
+            <i class="fa fa-eye"></i> View
+          </a>
+          <a [routerLink]="['/polls', poll.id, 'results']" class="action-btn results">
+            <i class="fa fa-chart-bar"></i> Results
+          </a>
+          <a [routerLink]="['/polls', poll.id, 'edit']" class="action-btn edit">
+            <i class="far fa-edit"></i> Edit
+          </a>
+          <button (click)="onDeletePoll(poll.id!)" class="action-btn delete">
+            <i class="far fa-trash-alt"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
