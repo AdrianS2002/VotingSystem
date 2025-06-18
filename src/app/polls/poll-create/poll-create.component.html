@@ -85,4 +85,32 @@
 
 <button type="submit">Creează sondaj</button>
 </form>
+
+<!-- Success Message with Share URL -->
+<div *ngIf="isPollCreated" class="success-overlay">
+  <div class="success-container">
+    <div class="success-header">
+      <i class="fas fa-check-circle"></i>
+      <h3>Sondaj creat cu succes!</h3>
+    </div>
+    
+    <p>Utilizează link-ul de mai jos pentru a distribui sondajul:</p>
+    
+    <div class="share-url-container">
+      <input #urlInput type="text" [value]="pollShareUrl" readonly class="share-url-input">
+      <button type="button" class="copy-btn" (click)="copyShareUrl(urlInput)">
+        <i class="fas fa-copy"></i> Copiază
+      </button>
+    </div>
+    
+    <div class="success-actions">
+      <a [routerLink]="['/polls', createdPollId]" class="btn btn-primary">
+        Vezi sondajul
+      </a>
+      <a [routerLink]="['/my-polls']" class="btn btn-secondary">
+        Toate sondajele mele
+      </a>
+    </div>
+  </div>
+</div>
 </div>
