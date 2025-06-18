@@ -116,14 +116,30 @@
         <i class="fas fa-check-circle"></i>
         <h3>Sondaj creat cu succes!</h3>
       </div>
-      
-      <p>Utilizează link-ul de mai jos pentru a distribui sondajul:</p>
+        <p>Utilizează link-ul de mai jos pentru a distribui sondajul:</p>
       
       <div class="share-url-container">
         <input #urlInput type="text" [value]="pollShareUrl" readonly class="share-url-input">
         <button type="button" class="copy-btn" (click)="copyShareUrl(urlInput)">
           <i class="fas fa-copy"></i> Copiază
         </button>
+      </div>
+      
+      <!-- Visibility instructions -->
+      <div class="visibility-notice" *ngIf="poll.visibility !== 'public'">
+        <div class="notice-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="notice-content">
+          <p *ngIf="poll.visibility === 'registered'">
+            <strong>Notă:</strong> Acest sondaj necesită autentificare.
+            Când cineva accesează link-ul, va trebui să fie autentificat sau să își creeze un cont pentru a putea vota.
+          </p>
+          <p *ngIf="poll.visibility === 'private'">
+            <strong>Notă:</strong> Acest sondaj este privat.
+            Doar persoanele specificate cu adresele de email vor putea accesa și vota în acest sondaj, după ce se autentifică.
+          </p>
+        </div>
       </div>
       
       <div class="success-actions">

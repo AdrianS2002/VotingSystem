@@ -366,6 +366,37 @@ button[type="submit"]:hover {
   margin-top: 2rem;
 }
 
+/* Visibility Notice */
+.visibility-notice {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(247, 250, 252, 0.8);
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.notice-icon {
+  padding-right: 1rem;
+  color: #3b82f6;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.notice-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.notice-content strong {
+  font-weight: 600;
+  color: #1e40af;
+}
+
 
 
 

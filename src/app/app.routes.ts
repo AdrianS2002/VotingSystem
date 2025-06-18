@@ -4,6 +4,7 @@ import { AuthComponent } from './auth/auth.component';
 import { DummyComponent } from './dummy/dummy.component';
 import { LearnMoreComponent } from './learn-more/learn-more.component';
 import { AuthGuard } from './auth.guard';
+import { PollAccessGuard } from './poll-access.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -11,7 +12,10 @@ export const routes: Routes = [
     path: 'auth',
     loadComponent: () => import('./auth/auth.component').then(m => m.AuthComponent)
   },
-
+  {
+    path: 'access-denied',
+    loadComponent: () => import('./access-denied/access-denied.component').then(m => m.AccessDeniedComponent)
+  },
   {
     path: 'polls/create',
     loadComponent: () => import('./polls/poll-create/poll-create.component').then(m => m.PollCreateComponent), canActivate: [AuthGuard]
@@ -19,11 +23,13 @@ export const routes: Routes = [
   },
   {
     path: 'polls/:id/results',
-    loadComponent: () => import('./polls/poll-results/poll-results.component').then(m => m.PollResultsComponent)
+    loadComponent: () => import('./polls/poll-results/poll-results.component').then(m => m.PollResultsComponent),
+    canActivate: [PollAccessGuard]
   },
   {
     path: 'polls/:id',
-    loadComponent: () => import('./polls/poll-details/poll-details.component').then(m => m.PollDetailsComponent)
+    loadComponent: () => import('./polls/poll-details/poll-details.component').then(m => m.PollDetailsComponent),
+    canActivate: [PollAccessGuard]
   },
   {
     path: 'polls/:id/edit',
