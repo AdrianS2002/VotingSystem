@@ -187,6 +187,7 @@
       </div>
     </div>
 
+
     <!-- Polls list -->
     <div *ngIf="!isLoading && filteredPolls.length > 0" class="polls-grid">
       <div *ngFor="let poll of filteredPolls" class="poll-card">
@@ -224,7 +225,7 @@
             <span>End: {{ formatDate(poll.expiresAt) }} <span class="time">{{ formatTime(poll.expiresAt) }}</span></span>
           </div>
         </div>
-        
+
         <div class="poll-actions">
           <a [routerLink]="['/polls', poll.id]" class="action-btn view">
             <i class="fa fa-eye"></i> View
@@ -232,8 +233,11 @@
           <a [routerLink]="['/polls', poll.id, 'results']" class="action-btn results">
             <i class="fa fa-chart-bar"></i> Results
           </a>
-          <button class="action-btn settings">
-            <i class="fa fa-cog"></i>
+          <a [routerLink]="['/polls', poll.id, 'edit']" class="action-btn edit">
+            <i class="far fa-edit"></i> Edit
+          </a>
+          <button (click)="onDeletePoll(poll.id!)" class="action-btn delete">
+            <i class="far fa-trash-alt"></i> Delete
           </button>
         </div>
       </div>

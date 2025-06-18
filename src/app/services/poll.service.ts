@@ -10,7 +10,8 @@ import {
   deleteDoc,
   query,
   where,
-  getDocs
+  getDocs,
+  getDoc
 } from '@angular/fire/firestore';
 import { Poll } from '../models/poll.model';
 import { AuthService } from './auth.service';
@@ -44,9 +45,23 @@ export class PollService {
   }
 
   getPoll(id: string): Observable<Poll> {
-    const pollDocRef = doc(this.firestore, `polls/${id}`);
-    return docData(pollDocRef, { idField: 'id' }) as Observable<Poll>;
-  }
+  console.log('📡 Apel getPoll() cu id:', id);
+  const pollRef = doc(this.firestore, `polls/${id}`);
+  console.log('🧾 pollRef construit:', pollRef);
+
+  return from(getDoc(pollRef)).pipe(
+    map(snapshot => {
+      if (!snapshot.exists()) {
+        throw new Error('Poll not found');
+      }
+      const data = snapshot.data() as Poll;
+      data.id = snapshot.id;
+      console.log('✅ Snapshot convertit în Poll:', data);
+      return data;
+    })
+  );
+}
+
 
   getPolls(): Observable<Poll[]> {
     const pollsCollection = collection(this.firestore, 'polls');
@@ -73,47 +88,16 @@ export class PollService {
     );
   }
 
-  private async getPollsRaw(): Promise<Poll[]> {
-    try {
-      const pollsSnapshot = await getDocs(collection(this.firestore, 'polls'));
-
-      return pollsSnapshot.docs.map(doc => {
-        const data = doc.data() as Omit<Poll, 'id'>;
-        return {
-          id: doc.id,
-          ...data
-        } as Poll;
-      });
-    } catch (error) {
-      console.error('Error fetching polls:', error);
-      return [];
-    }
-  }
-
-  getUserPolls(): Observable<Poll[]> {
-    return this.authService.user.pipe(
-      take(1),
-      switchMap(user => {
-        if (!user) {
-          return of([]);
-        }
-
-        try {
-          const collectionRef = collection(this.firestore, 'polls');
-          const q = query(collectionRef, where('createdBy', '==', user.id));
-          return collectionData(q, { idField: 'id' }) as Observable<Poll[]>;
-        } catch (error) {
-          console.error("Error setting up user polls query:", error);
-          return of([]);
-        }
-      })
-    );
-  }
 
   updatePoll(id: string, poll: Partial<Poll>) {
+    console.log('📝 Apel updatePoll() cu id:', id);
+    console.log('📦 Conținut de updatat:', poll);
     const pollDocRef = doc(this.firestore, `polls/${id}`);
+    console.log('📌 Referință document Firestore:', pollDocRef);
+
     return from(updateDoc(pollDocRef, poll));
   }
+
 
   deletePoll(id: string) {
     const pollDocRef = doc(this.firestore, `polls/${id}`);
@@ -121,11 +105,11 @@ export class PollService {
   }
 
   async hasUserVoted(pollId: string, userId: string): Promise<boolean> {
-  const votesRef = collection(this.firestore, 'votes');
-  const q = query(votesRef, where('pollId', '==', pollId), where('userId', '==', userId));
-  const snapshot = await getDocs(q);
-  return !snapshot.empty;
-}
+    const votesRef = collection(this.firestore, 'votes');
+    const q = query(votesRef, where('pollId', '==', pollId), where('userId', '==', userId));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  }
 
 
 }

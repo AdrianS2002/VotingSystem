@@ -41,7 +41,7 @@ export class MyPollsComponent implements OnInit {
     private pollService: PollService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const profile = this.authService.currentUserProfile;
@@ -240,6 +240,7 @@ export class MyPollsComponent implements OnInit {
     }
   }
 
+
   getStatusClass(poll: Poll): string {
     if (!this.isPollPublished(poll)) {
       return 'upcoming';
@@ -253,4 +254,20 @@ export class MyPollsComponent implements OnInit {
   getPollsCountByVisibility(visibility: string): number {
     return this.myPolls.filter(poll => poll.visibility === visibility).length;
   }
+
+  onDeletePoll(pollId: string): void {
+  if (confirm('Are you sure you want to delete this poll?')) {
+    this.pollService.deletePoll(pollId).subscribe({
+      next: () => {
+        this.myPolls = this.myPolls.filter(p => p.id !== pollId);
+        console.log('Poll deleted successfully.');
+      },
+      error: err => {
+        console.error('Failed to delete poll:', err);
+      }
+    });
+  }
+}
+
+
 }
