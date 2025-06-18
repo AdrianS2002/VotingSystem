@@ -10,11 +10,10 @@
 
     <!-- Hero Search -->
     <div class="hero-search">
-      <div class="search-container">
-        <input type="text"
+      <div class="search-container">        <input type="text"
                placeholder="Search for polls, topics, or issues..."
                [(ngModel)]="searchTerm" />
-        <button class="hero-search-btn" (click)="onSearch()">🔍 Search Polls</button>
+        <button class="hero-search-btn" (click)="onSearch()"><i class="fas fa-search"></i> Search Polls</button>
       </div>
     </div>
   </div>
@@ -31,6 +30,13 @@
         <ng-container *ngSwitchCase="'past'">Past Polls</ng-container>
         <ng-container *ngSwitchCase="'all'">All Polls</ng-container>
       </ng-container>
+      <ng-container *ngIf="accessFilter !== 'all'">
+      <ng-container [ngSwitch]="accessFilter">
+        <ng-container *ngSwitchCase="'public'"> Public</ng-container>
+        <ng-container *ngSwitchCase="'registered'"> Registered-Only</ng-container>
+        <ng-container *ngSwitchCase="'private'"> Private</ng-container>
+      </ng-container>
+    </ng-container>
     </h2>
     <p class="section-subtitle">
       <ng-container [ngSwitch]="statusFilter">
@@ -42,7 +48,6 @@
     </p>
   </div>
 
-  <!-- Stats Grid (optional: bind values dynamically later) -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-number">{{ allPolls.length }}</div>
@@ -52,9 +57,8 @@
 
   <!-- Filters and Create Button -->
   <div class="create-new">
-    <div class="filters">
-      <div class="filter-group">
-        <label for="status-filter">Poll Status:</label>
+    <div class="filters">      <div class="filter-group status-filter">
+        <label for="status-filter"><i class="fas fa-chart-bar"></i> Poll Status</label>
         <select id="status-filter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
           <option value="active">Active</option>
           <option value="future">Upcoming</option>
@@ -62,9 +66,39 @@
           <option value="all">All</option>
         </select>
       </div>
+
+      <div *ngIf="isAuthenticated" class="filter-group access-filter">
+        <label for="access-filter"><i class="fas fa-lock"></i> Visibility</label>
+        <select id="access-filter" [(ngModel)]="accessFilter" (change)="onAccessFilterChange()">
+          <option value="all">All</option>
+          <option value="public">Public</option>
+          <option value="registered">Registered Users</option>
+          <option value="private">Private</option>
+        </select>
+      </div>
+
+      <div class="filter-group sort-filter">
+       <label for="sort-filter"><i class="fas fa-sort"></i> Sort By</label>
+       <select id="sort-filter" [(ngModel)]="sortFilter" (change)="onSortFilterChange()">
+         <option *ngFor="let option of sortOptions" [value]="option.value">
+         {{ option.label }}
+         </option>
+        </select>
+      </div>
     </div>
 
-    <a routerLink="/polls/create" class="btn btn-primary" *ngIf="isAdmin">Create New Poll</a>
+    <a routerLink="/polls/create" class="btn btn-primary" *ngIf="isAdmin">
+      Create New Poll
+    </a>
+  </div>
+
+  <div class="active-filters" *ngIf="statusFilter !== 'all' || accessFilter !== 'all'">
+    <div class="filter-badge" *ngIf="statusFilter !== 'all'">
+      <i class="fas fa-chart-bar"></i> {{ statusFilter }}
+    </div>
+    <div class="filter-badge" *ngIf="accessFilter !== 'all'">
+      <i class="fas fa-lock"></i> {{ accessFilter }}
+    </div>
   </div>
 
   <!-- Loading -->
@@ -77,17 +111,15 @@
     <span>{{ error }}</span>
     <button (click)="loadPolls()" class="btn btn-retry">Retry</button>
   </div>
-
   <!-- No Polls -->
   <div *ngIf="!isLoading && !error && allPolls.length === 0" class="no-polls">
-    <div class="no-polls-icon">📊</div>
+    <div class="no-polls-icon"><i class="fas fa-chart-bar"></i></div>
     <p>No polls found. Create your first poll!</p>
     <a routerLink="/create" class="btn btn-primary">Create a Poll</a>
   </div>
-
   <!-- No Results -->
   <div *ngIf="!isLoading && !error && allPolls.length > 0 && polls.length === 0" class="no-polls">
-    <div class="no-polls-icon">🔍</div>
+    <div class="no-polls-icon"><i class="fas fa-search"></i></div>
     <p>No polls match your search criteria.</p>
     <button (click)="searchTerm = ''; statusFilter = 'all'; applyFilters()" class="btn btn-primary">Clear Filters</button>
   </div>
@@ -107,19 +139,16 @@
         <span *ngIf="isPollExpired(poll)" class="badge status-badge expired">Expired</span>
       </div>
       
-      <p>Total votes: {{ poll.totalVotes || 0 }}</p>
-
-      <div class="poll-info">
+      <p>Total votes: {{ poll.totalVotes || 0 }}</p>      <div class="poll-info">
         <div class="poll-info-item">
-          <span>📅 Starts: {{ formatDate(poll.publishDate) }} <span class="time">{{ formatTime(poll.publishDate) }}</span></span>
+          <span><i class="far fa-calendar-alt"></i> Starts: {{ formatDate(poll.publishDate) }} <span class="time">{{ formatTime(poll.publishDate) }}</span></span>
         </div>
         <div class="poll-info-item">
-          <span>⏰ Expires: {{ formatDate(poll.expiresAt) }} <span class="time">{{ formatTime(poll.expiresAt) }}</span></span>
+          <span><i class="far fa-clock"></i> Expires: {{ formatDate(poll.expiresAt) }} <span class="time">{{ formatTime(poll.expiresAt) }}</span></span>
         </div>
       </div>
 
       <div class="poll-actions">
-        <!-- Conditionally disable vote button based on poll status -->
         <a *ngIf="isPollActive(poll)" [routerLink]="['/polls', poll.id]" class="btn-sm">Vote Now</a>
         <span *ngIf="!isPollPublished(poll)" class="btn-sm disabled">Not Started</span>
         <span *ngIf="isPollExpired(poll)" class="btn-sm disabled">Voting Closed</span>
