@@ -1,11 +1,5 @@
-/* Profile Container */
-.profile-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
 
-/* Profile Header */
+/* Profile Header Section */
 .profile-header {
   display: flex;
   align-items: center;
@@ -22,11 +16,13 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
+  overflow: hidden;
   background-color: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 3px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .initial-avatar {
@@ -54,7 +50,7 @@
   gap: 1rem;
 }
 
-.btn-create, .btn-settings {
+.btn-create {
   padding: 0.75rem 1.5rem;
   background: rgba(255, 255, 255, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -63,12 +59,9 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-}
-
-.btn-create {
+  text-decoration: none;
   display: flex;
   align-items: center;
-  text-decoration: none;
 }
 
 .btn-create::before {
@@ -78,13 +71,24 @@
   font-weight: 700;
 }
 
-.btn-create:hover, .btn-settings:hover {
+.btn-create:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
 }
 
 .btn-settings {
+  padding: 0.75rem 1rem;
   background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-settings:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Stats Grid */
@@ -108,6 +112,7 @@
 
 .stat-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
 }
 
 .stat-icon {
@@ -137,12 +142,27 @@
 }
 
 /* Stat card variations */
-.stat-card.primary .stat-icon { background-color: rgba(101, 118, 215, 0.15); color: #6576d7; }
-.stat-card.success .stat-icon { background-color: rgba(72, 187, 120, 0.15); color: #48bb78; }
-.stat-card.info .stat-icon { background-color: rgba(49, 130, 206, 0.15); color: #3182ce; }
-.stat-card.warning .stat-icon { background-color: rgba(246, 173, 85, 0.15); color: #f6ad55; }
+.stat-card.primary .stat-icon {
+  background-color: rgba(101, 118, 215, 0.15);
+  color: #6576d7;
+}
 
-/* Section Styling */
+.stat-card.success .stat-icon {
+  background-color: rgba(72, 187, 120, 0.15);
+  color: #48bb78;
+}
+
+.stat-card.info .stat-icon {
+  background-color: rgba(49, 130, 206, 0.15);
+  color: #3182ce;
+}
+
+.stat-card.warning .stat-icon {
+  background-color: rgba(246, 173, 85, 0.15);
+  color: #f6ad55;
+}
+
+/* Section styling */
 .section-title {
   margin-bottom: 1.5rem;
   position: relative;
@@ -163,7 +183,7 @@
   border-radius: 2px;
 }
 
-/* Activity Section */
+/* Activity section */
 .activity-section {
   margin-bottom: 3rem;
 }
@@ -189,7 +209,7 @@
   margin: 0 0 1.25rem 0;
 }
 
-/* Status Chart */
+/* Status bar chart */
 .status-bar {
   height: 40px;
   display: flex;
@@ -205,11 +225,20 @@
   color: white;
   font-weight: 600;
   min-width: 30px;
+  transition: all 0.3s;
 }
 
-.status-segment.active { background-color: #48bb78; }
-.status-segment.upcoming { background-color: #f6ad55; }
-.status-segment.expired { background-color: #a0aec0; }
+.status-segment.active {
+  background-color: #48bb78;
+}
+
+.status-segment.upcoming {
+  background-color: #f6ad55;
+}
+
+.status-segment.expired {
+  background-color: #a0aec0;
+}
 
 .status-legend {
   display: flex;
@@ -230,11 +259,19 @@
   border-radius: 3px;
 }
 
-.legend-color.active { background-color: #48bb78; }
-.legend-color.upcoming { background-color: #f6ad55; }
-.legend-color.expired { background-color: #a0aec0; }
+.legend-color.active {
+  background-color: #48bb78;
+}
 
-/* Visibility Stats */
+.legend-color.upcoming {
+  background-color: #f6ad55;
+}
+
+.legend-color.expired {
+  background-color: #a0aec0;
+}
+
+/* Visibility stats */
 .visibility-stats {
   display: flex;
   flex-direction: column;
@@ -258,9 +295,20 @@
   text-transform: capitalize;
 }
 
-.visibility-label.public { background-color: rgba(72, 187, 120, 0.15); color: #48bb78; }
-.visibility-label.registered { background-color: rgba(246, 173, 85, 0.15); color: #f6ad55; }
-.visibility-label.private { background-color: rgba(237, 100, 166, 0.15); color: #ed64a6; }
+.visibility-label.public {
+  background-color: rgba(72, 187, 120, 0.15);
+  color: #48bb78;
+}
+
+.visibility-label.registered {
+  background-color: rgba(246, 173, 85, 0.15);
+  color: #f6ad55;
+}
+
+.visibility-label.private {
+  background-color: rgba(237, 100, 166, 0.15);
+  color: #ed64a6;
+}
 
 .visibility-count {
   font-size: 1.125rem;
@@ -268,7 +316,7 @@
   color: #2d3748;
 }
 
-/* Highlight Card */
+/* Highlight card */
 .activity-card.highlight {
   background: linear-gradient(135deg, #f6f9fc 0%, #f1f5f9 100%);
   border-left: 4px solid #6576d7;
@@ -309,13 +357,18 @@
   font-weight: 600;
   text-align: center;
   text-decoration: none;
+  transition: all 0.2s;
 }
 
 .btn-view:hover {
   background-color: rgba(101, 118, 215, 0.1);
 }
 
-/* Filters */
+/* My Polls section */
+.my-polls-section {
+  margin-bottom: 3rem;
+}
+
 .filters-container {
   display: flex;
   gap: 1.5rem;
@@ -347,6 +400,7 @@
   font-size: 0.875rem;
   color: #2d3748;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .filter-group select:focus {
@@ -355,20 +409,53 @@
   box-shadow: 0 0 0 3px rgba(101, 118, 215, 0.1);
 }
 
-.empty-content {
+/* Loading and empty states */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem;
+  color: #4a5568;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(101, 118, 215, 0.1);
+  border-left-color: #6576d7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-state {
+  padding: 3rem;
   text-align: center;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
 .empty-content i {
   color: #a0aec0;
-  margin-bottom: 1rem;
 }
 
 .empty-content h3 {
   font-size: 1.25rem;
   font-weight: 600;
   color: #2d3748;
-  margin: 0 0 0.5rem;
+  margin: 0;
 }
 
 .empty-content p {
@@ -383,10 +470,215 @@
   border-radius: 8px;
   font-weight: 600;
   text-decoration: none;
-  display: inline-block;
+  transition: all 0.2s;
 }
 
-/* Responsive Adjustments */
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(101, 118, 215, 0.2);
+}
+
+/* Polls grid */
+.polls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.poll-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  position: relative;
+  transition: all 0.3s;
+  overflow: hidden;
+}
+
+.poll-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+}
+
+.poll-status {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.4rem 1rem;
+  color: white;
+  font-weight: 600;
+  font-size: 0.75rem;
+  border-bottom-left-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.poll-status.active {
+  background-color: #48bb78;
+}
+
+.poll-status.expired {
+  background-color: #a0aec0;
+}
+
+.poll-status.upcoming {
+  background-color: #f6ad55;
+}
+
+.poll-card h3 {
+  margin: 0.5rem 0 1.25rem;
+  font-size: 1.25rem;
+  color: #2d3748;
+  font-weight: 600;
+  line-height: 1.4;
+  padding-right: 4rem; /* Space for status indicator */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3rem;
+}
+
+.poll-badges {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.badge.public {
+  background-color: rgba(72, 187, 120, 0.1);
+  color: #48bb78;
+}
+
+.badge.registered {
+  background-color: rgba(246, 173, 85, 0.1);
+  color: #f6ad55;
+}
+
+.badge.private {
+  background-color: rgba(237, 100, 166, 0.1);
+  color: #ed64a6;
+}
+
+.badge.votes {
+  background-color: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+.poll-time-info {
+  margin-bottom: 1.25rem;
+}
+
+.time-remaining {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.time-remaining.active {
+  background-color: rgba(72, 187, 120, 0.1);
+  color: #48bb78;
+}
+
+.time-remaining.expired {
+  background-color: rgba(160, 174, 192, 0.1);
+  color: #a0aec0;
+}
+
+.time-remaining.upcoming {
+  background-color: rgba(246, 173, 85, 0.1);
+  color: #f6ad55;
+}
+
+.poll-dates {
+  margin-bottom: 1.25rem;
+}
+
+.date-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.date-item i {
+  color: #667eea;
+  width: 1rem;
+  text-align: center;
+}
+
+.time {
+  color: #718096;
+  margin-left: 0.5rem;
+}
+
+.poll-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.action-btn.view {
+  background-color: #ebf4ff;
+  color: #3182ce;
+}
+
+.action-btn.view:hover {
+  background-color: #bee3f8;
+}
+
+.action-btn.results {
+  background-color: #faf5ff;
+  color: #805ad5;
+}
+
+.action-btn.results:hover {
+  background-color: #e9d8fd;
+}
+
+.action-btn.settings {
+  flex: 0 0 40px;
+  background-color: #f7fafc;
+  color: #4a5568;
+}
+
+.action-btn.settings:hover {
+  background-color: #edf2f7;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .profile-header {
     flex-direction: column;
@@ -396,7 +688,6 @@
   .profile-actions {
     width: 100%;
     justify-content: center;
-    margin-top: 1rem;
   }
   
   .filters-container {
@@ -408,6 +699,10 @@
   }
   
   .activity-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .polls-grid {
     grid-template-columns: 1fr;
   }
 }

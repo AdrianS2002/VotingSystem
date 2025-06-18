@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [NgIf, NgFor, CommonModule, RouterModule, FormsModule],
   templateUrl: './my-polls.component.html',
-  styleUrl: './my-polls.component.css'
+  styleUrls: ['./my-polls.component.css', './my-polls-extended.component.scss']
 })
 export class MyPollsComponent implements OnInit {
   myPolls: Poll[] = [];
@@ -92,7 +92,6 @@ export class MyPollsComponent implements OnInit {
         break;
       case 'all':
       default:
-        // No additional filtering
         break;
     }
     
