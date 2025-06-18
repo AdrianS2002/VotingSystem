@@ -57,10 +57,10 @@ export class ErrorFallbackComponent {
   onRetry(): void {
     this.isRetrying = true;
     
-    // Emit retry event
+    
     this.retry.emit();
     
-    // Reset loading state after a delay if no external handling
+    
     setTimeout(() => {
       this.isRetrying = false;
     }, 2000);
@@ -70,13 +70,7 @@ export class ErrorFallbackComponent {
     this.router.navigate(['/']);
   }
 
-  onContactSupport(): void {
-    this.contactSupport.emit();
-    // Default behavior if no external handler
-    if (this.contactSupport.observers.length === 0) {
-      this.router.navigate(['/contact']);
-    }
-  }
+  
 
   toggleErrorDetails(): void {
     this.showErrorDetails = !this.showErrorDetails;
