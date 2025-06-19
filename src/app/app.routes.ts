@@ -15,11 +15,10 @@ export const routes: Routes = [
   {
     path: 'access-denied',
     loadComponent: () => import('./access-denied/access-denied.component').then(m => m.AccessDeniedComponent)
-  },
-  {
+  },  {
     path: 'polls/create',
-    loadComponent: () => import('./polls/poll-create/poll-create.component').then(m => m.PollCreateComponent), canActivate: [AuthGuard]
-
+    loadComponent: () => import('./polls/poll-create/poll-create.component').then(m => m.PollCreateComponent), 
+    canActivate: [AuthGuard]
   },
   {
     path: 'polls/:id/results',
@@ -30,14 +29,15 @@ export const routes: Routes = [
     path: 'polls/:id',
     loadComponent: () => import('./polls/poll-details/poll-details.component').then(m => m.PollDetailsComponent),
     canActivate: [PollAccessGuard]
-  },
-  {
+  },  {
     path: 'polls/:id/edit',
-    loadComponent: () => import('./polls/poll-edit/poll-edit.component').then(m => m.EditPollComponent), canActivate: [AuthGuard]
-  },
-  {
+    loadComponent: () => import('./polls/poll-edit/poll-edit.component').then(m => m.EditPollComponent), 
+    canActivate: [AuthGuard]
+  },  {
     path: 'my-polls',
-    loadComponent: () => import('./my-polls/my-polls.component').then(m => m.MyPollsComponent),
+    loadComponent: () => import('./my-polls/my-polls.component').then(m => m.MyPollsComponent), 
+    canActivate: [AuthGuard]
+    // No requiresAdmin: true flag, so any authenticated user can access this
   },
   {
     path: 'polls',

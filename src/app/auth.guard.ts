@@ -14,11 +14,22 @@ export class AuthGuard implements CanActivate {
   ): Observable<boolean | UrlTree> {
     return this.authService.user.pipe(
       take(1),
-      map(() => {
+      map(user => {
         const profile = this.authService.currentUserProfile;
-        if (profile && profile.role?.includes('admin')) {
+        
+        // Check if the route requires admin role specifically
+        const requiresAdmin = route.data['requiresAdmin'] === true;
+        
+        // Allow if the user is authenticated
+        if (profile) {
+          // If admin role is required, check for it
+          if (requiresAdmin && !profile.role?.includes('admin')) {
+            return this.router.createUrlTree(['/access-denied']);
+          }
           return true;
         } else {
+          // Store the current URL for redirection after login
+          localStorage.setItem('redirectUrl', state.url);
           return this.router.createUrlTree(['/auth']);
         }
       })
