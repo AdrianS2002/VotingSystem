@@ -32,14 +32,12 @@
             </span>
           </div>
 
-          <p class="vote-description">{{ poll.description }}</p>
-
-          <div class="vote-info">
+          <p class="vote-description">{{ poll.description }}</p>          <div class="vote-info">
             <div class="vote-info-item">
               <i class="fas fa-users"></i> {{ poll.totalVotes }} Votes
             </div>
             <div class="vote-info-item">
-              <i class="fas fa-calendar-alt"></i> Ends {{ poll.expiresAt | date: 'mediumDate' }}
+              <i class="fas fa-calendar-alt"></i> {{ poll.expiresAt < today ? 'Ended' : 'Ends' }} {{ poll.expiresAt | date: 'shortDate' }}
             </div>
           </div>
 
@@ -55,7 +53,7 @@
 
           <div class="vote-actions">
             <button (click)="onVoteClick(poll.id)" class="btn btn-primary">Vote Now</button>
-            <a [routerLink]="['/polls', poll.id, 'results']" class="btn btn-outline">See Details</a>
+            <!-- <a [routerLink]="['/polls', poll.id, 'results']" class="btn btn-outline">See Details</a> -->
           </div>
         </div>
       </div>
@@ -150,7 +148,7 @@
                [style.pointer-events]="poll.expiresAt < today || poll.hasVoted ? 'none' : 'auto'">
               {{ poll.hasVoted ? 'Already Voted' : 'Vote' }}
             </a>
-            <a [routerLink]="['/polls', poll.id, 'results']" class="btn-results">See Results</a>
+            <a [routerLink]="['/polls', poll.id, 'results']" class="btn btn-outline">See Results</a>
           </div>
         </div>
       </div>

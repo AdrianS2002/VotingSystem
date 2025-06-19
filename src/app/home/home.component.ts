@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'],
+  styleUrls: ['./home.component.css', './home-extended.component.css'],
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule]
 })
@@ -67,12 +67,7 @@ export class HomeComponent implements OnInit {
       console.error('Poll ID is undefined');
       return;
     }
-
-    // if (this.isLoggedIn) {
     this.router.navigate(['/polls', pollId]);
-    // } else {
-    //   this.router.navigate(['/auth']);
-    // }
   }
 
 
