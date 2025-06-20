@@ -10,7 +10,7 @@
     <ul class="nav-links" [class.active]="isMenuOpen">
       <li><a href="#" (click)="navigateToHome($event)">Home</a></li>
       <li><a href="#" (click)="navigateToPolls($event)">Polls</a></li>
-      <li *ngIf="(authService.user | async) as user;">
+      <li>
         <a href="#" (click)="navigateToMyPolls($event)">My Polls</a>
       </li>
       <li *ngIf="(authService.user | async) as user; else showLogin">

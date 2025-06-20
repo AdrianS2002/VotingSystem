@@ -52,10 +52,9 @@ export class MyPollsComponent implements OnInit {
       this.userEmail = profile.email || '';
       this.isLoggedIn = true;
     }
-    
-    if (!userId) {
+      if (!userId) {
       console.warn('User not authenticated');
-      this.router.navigate(['/login'], { 
+      this.router.navigate(['/auth'], { 
         queryParams: { redirectTo: '/my-polls' } 
       });
       return;

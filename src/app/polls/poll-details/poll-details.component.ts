@@ -45,8 +45,6 @@ async ngOnInit() {
 
     this.poll = { id: pollDoc.id, ...pollDoc.data() } as Poll;
 
-    // We don't need to check visibility permissions here anymore
-    // because the PollAccessGuard already handles that
 
     const isAdmin = this.authService.currentUserProfile?.role === 'admin';
     const now = new Date();
