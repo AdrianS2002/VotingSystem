@@ -105,6 +105,9 @@
 /* Main Content */
 .main-content {
   padding: 2rem 0;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Section Headers */
@@ -286,4 +289,47 @@
 .stat-label {
   color: #666;
   font-size: 0.9rem;
+}
+
+
+/* xs */
+@media (min-width: 475px) {
+    .main-content{
+        max-width: 475px;
+    }
+}
+
+/* sm */
+@media (min-width: 640px) {
+    .main-content{
+        max-width: 640px;
+    }
+}
+
+/* md */
+@media (min-width: 768px) {
+    .main-content{
+        max-width: 768px;
+    }
+}
+
+/* lg */
+@media (min-width: 1024px) {
+    .main-content{
+        max-width: 1024px;
+    }
+}
+
+/* xl */
+@media (min-width: 1280px) {
+    .main-content{
+        max-width: 1280px;
+    }
+}
+
+/* 2xl */
+@media (min-width: 1536px) {
+    .main-content{
+        max-width: 1536px;
+    }
 }
