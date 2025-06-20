@@ -22,8 +22,7 @@ export const routes: Routes = [
   },
   {
     path: 'polls/:id/results',
-    loadComponent: () => import('./polls/poll-results/poll-results.component').then(m => m.PollResultsComponent),
-    canActivate: [PollAccessGuard]
+    loadComponent: () => import('./polls/poll-results/poll-results.component').then(m => m.PollResultsComponent)
   },
   {
     path: 'polls/:id',
@@ -37,7 +36,6 @@ export const routes: Routes = [
     path: 'my-polls',
     loadComponent: () => import('./my-polls/my-polls.component').then(m => m.MyPollsComponent), 
     canActivate: [AuthGuard]
-    // No requiresAdmin: true flag, so any authenticated user can access this
   },
   {
     path: 'polls',
