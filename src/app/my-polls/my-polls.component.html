@@ -233,7 +233,7 @@
           <a [routerLink]="['/polls', poll.id, 'results']" class="action-btn results">
             <i class="fa fa-chart-bar"></i> Results
           </a>
-          <a [routerLink]="['/polls', poll.id, 'edit']" class="action-btn edit">
+          <a [routerLink]="['/polls', poll.id, 'edit']" class="action-btn edit" *ngIf="!isPollActive(poll)">
             <i class="far fa-edit"></i> Edit
           </a>
           <button (click)="onDeletePoll(poll.id!)" class="action-btn delete">
