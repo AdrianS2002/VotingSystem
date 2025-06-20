@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Poll, PollOption } from '../../models/poll.model';
 import { PollService } from '../../services/poll.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-poll-create',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './poll-create.component.html',
   styleUrl: './poll-create.component.css'
 })
@@ -22,10 +22,15 @@ export class PollCreateComponent implements OnInit {
     expiresAt: new Date(),
     totalVotes: 0,
     createdBy: '',
+    
   };
   dateValidation?: {valid: boolean, message?: string};
   voterEmails = '';
   isLoading = false;
+
+  isPollCreated = false;
+  createdPollId = '';
+  pollShareUrl = '';
 
   constructor(private pollService: PollService, private router: Router) {}
 
@@ -101,11 +106,11 @@ export class PollCreateComponent implements OnInit {
 
     this.isLoading = true;
     this.pollService.createPoll(pollToSubmit).subscribe({
-      next: () => {
+      next: (response) => {
         this.isLoading = false;
-        setTimeout(() => {
-          this.router.navigate(['/']);
-        }, 1000);
+        const pollId = response.id;
+
+        this.showPollCreatedSuccess(pollId);
       },
       error: (error) => {
         console.error('Error creating poll:', error);
@@ -114,6 +119,15 @@ export class PollCreateComponent implements OnInit {
       }
     });
   }
+
+  showPollCreatedSuccess(pollId: string) {
+  this.isPollCreated = true;
+  this.createdPollId = pollId;
+  
+
+  const baseUrl = window.location.origin;
+  this.pollShareUrl = `${baseUrl}/polls/${pollId}`;
+}
 
 
 validateDates(): {valid: boolean, message?: string} {
@@ -167,5 +181,25 @@ formatDateForInput(date: Date): any {
   const minutes = String(date.getMinutes()).padStart(2, '0');
   
   return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+copyShareUrl(inputElement: HTMLInputElement): void {
+  inputElement.select();
+  
+  navigator.clipboard.writeText(inputElement.value)
+    .then(() => {
+      const copyBtn = document.querySelector('.copy-btn');
+      if (copyBtn) {
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiat!';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+        }, 2000);
+      }
+    })
+    .catch(err => {
+      console.error('Failed to copy: ', err);
+      document.execCommand('copy');
+    });
 }
 }

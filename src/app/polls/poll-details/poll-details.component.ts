@@ -45,17 +45,12 @@ async ngOnInit() {
 
     this.poll = { id: pollDoc.id, ...pollDoc.data() } as Poll;
 
+    // We don't need to check visibility permissions here anymore
+    // because the PollAccessGuard already handles that
+
     const isAdmin = this.authService.currentUserProfile?.role === 'admin';
     const now = new Date();
-    const publishDate = this.getDateObject(this.poll.publishDate);
     
-    // Check if poll is scheduled for the future
-    if (!isAdmin && publishDate > now) {
-      this.error = 'This poll is not yet available.';
-      this.router.navigate(['/polls']);
-      return;
-    }
-
     // Check if poll has expired
     const expiryDate = this.getDateObject(this.poll.expiresAt);
     if (now > expiryDate) {
@@ -65,37 +60,6 @@ async ngOnInit() {
       
       if(!isAdmin){
         this.error = null
-      }
-    }
-
-    // Check visibility restrictions
-    if (this.poll.visibility === 'registered') {
-      // For 'registered' visibility,
-      if (!this.authService.currentUserProfile) {
-        this.error = 'This poll requires you to be logged in to view and vote.';
-        this.router.navigate(['/login'], { 
-          queryParams: { redirectTo: `/polls/${this.pollId}` } 
-        });
-        return;
-      }
-    } 
-    else if (this.poll.visibility === 'private' && this.poll.allowedVoters?.length) {
-      // For 'private' visibility, user must be in the allowedVoters list
-      const user = this.authService.currentUserProfile;
-      if (!user || !user.email) {
-        this.error = 'This poll is private. Please sign in with the email address you received the invitation with.';
-        this.router.navigate(['/login'], { 
-          queryParams: { redirectTo: `/polls/${this.pollId}` } 
-        });
-        return;
-      }
-
-      const normalizedEmails = this.poll.allowedVoters.map(email => email.trim().toLowerCase());
-      const currentEmail = user.email.trim().toLowerCase();
-
-      if (!normalizedEmails.includes(currentEmail)) {
-        this.error = 'You do not have permission to access this private poll.';
-        return;
       }
     }
 
@@ -139,28 +103,8 @@ async submitVote() {
     return;
   }
 
-  // Check visibility permissions
-  if (this.poll.visibility === 'registered') {
-    if (!this.authService.currentUserProfile) {
-      this.error = 'You must be logged in to vote in this poll.';
-      return;
-    }
-  }
-  else if (this.poll.visibility === 'private' && this.poll.allowedVoters?.length) {
-    const user = this.authService.currentUserProfile;
-    if (!user || !user.email) {
-      this.error = 'You must be logged in with the invited email to vote in this poll.';
-      return;
-    }
-
-    const normalizedEmails = this.poll.allowedVoters.map(email => email.trim().toLowerCase());
-    const currentEmail = user.email.trim().toLowerCase();
-
-    if (!normalizedEmails.includes(currentEmail)) {
-      this.error = 'You are not authorized to vote in this private poll.';
-      return;
-    }
-  }
+  // Note: We don't need to check visibility permissions here anymore
+  // because the PollAccessGuard already handles that
 
   this.isLoading = true;
 
