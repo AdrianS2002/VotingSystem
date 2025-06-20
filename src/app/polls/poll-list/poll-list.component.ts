@@ -26,7 +26,18 @@ export class PollListComponent implements OnInit {
   searchTerm = '';
   // Change default to 'active'
   statusFilter = 'active';
-  
+  accessFilter = 'all';
+  sortFilter = 'newest';
+    sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'most-voted', label: 'Most Voted' },
+    { value: 'least-voted', label: 'Least Voted' },
+    { value: 'start-date', label: 'Start Date' },
+    { value: 'end-date', label: 'End Date' }
+  ];
+
+
   currentPage = 1;
   itemsPerPage = 6;
   totalPages = 1;
@@ -101,34 +112,36 @@ export class PollListComponent implements OnInit {
     
     console.log('After visibility filtering:', filteredPolls.length);
     
-    // Step 2: Filter by status
-    switch (this.statusFilter) {
-      case 'active':
-        // Active polls: published but not expired
-        filteredPolls = filteredPolls.filter(poll => 
-          this.isPollPublished(poll) && !this.isPollExpired(poll)
-        );
-        break;
-      case 'future':
-        // Future polls: not yet published
-        filteredPolls = filteredPolls.filter(poll => 
-          !this.isPollPublished(poll)
-        );
-        break;
-      case 'past':
-        // Past polls: already expired
-        filteredPolls = filteredPolls.filter(poll => 
-          this.isPollExpired(poll)
-        );
-        break;
-      case 'all':
-        // No additional filtering needed for 'all'
-        break;
-    }
+  // Step 2: Filter by access type
+  if (this.accessFilter !== 'all') {
+    filteredPolls = filteredPolls.filter(poll => poll.visibility === this.accessFilter);
+    console.log(`After ${this.accessFilter} access filtering:`, filteredPolls.length);
+  }
+  
+  // Step 3: Filter by status (existing code)
+  switch (this.statusFilter) {
+    case 'active':
+      filteredPolls = filteredPolls.filter(poll => 
+        this.isPollPublished(poll) && !this.isPollExpired(poll)
+      );
+      break;
+    case 'future':
+      filteredPolls = filteredPolls.filter(poll => 
+        !this.isPollPublished(poll)
+      );
+      break;
+    case 'past':
+      filteredPolls = filteredPolls.filter(poll => 
+        this.isPollExpired(poll)
+      );
+      break;
+    case 'all':
+      // No additional filtering needed
+      break;
+  }
     
     console.log(`After ${this.statusFilter} status filtering:`, filteredPolls.length);
     
-    // Step 3: Filter by search term
     if (this.searchTerm?.trim()) {
       const term = this.searchTerm.toLowerCase().trim();
       filteredPolls = filteredPolls.filter(poll => 
@@ -137,6 +150,8 @@ export class PollListComponent implements OnInit {
       console.log('After search filtering:', filteredPolls.length);
     }
     
+      this.sortPolls(filteredPolls);
+
     // Update pagination
     this.totalPages = Math.max(1, Math.ceil(filteredPolls.length / this.itemsPerPage));
     
@@ -197,6 +212,15 @@ export class PollListComponent implements OnInit {
     this.applyFilters();
   }
 
+  onAccessFilterChange() {
+  this.currentPage = 1;
+  this.applyFilters();
+}
+
+onSortFilterChange() {
+  this.applyFilters();
+}
+
   formatDate(date: any): string {
     if (!date) return '';
     
@@ -251,4 +275,51 @@ export class PollListComponent implements OnInit {
   prevPage() {
     this.setPage(this.currentPage - 1);
   }
+
+private sortPolls(polls: Poll[]): void {
+  switch (this.sortFilter) {
+    case 'newest':
+      polls.sort((a, b) => {
+        // Sort by created date, newest first
+        return this.getDateObject(b.createdAt).getTime() - this.getDateObject(a.createdAt).getTime();
+      });
+      break;
+      
+    case 'oldest':
+      polls.sort((a, b) => {
+        // Sort by created date, oldest first
+        return this.getDateObject(a.createdAt).getTime() - this.getDateObject(b.createdAt).getTime();
+      });
+      break;
+      
+    case 'most-voted':
+      polls.sort((a, b) => {
+        // Sort by total votes, highest first
+        return (b.totalVotes || 0) - (a.totalVotes || 0);
+      });
+      break;
+      
+    case 'least-voted':
+      polls.sort((a, b) => {
+        // Sort by total votes, lowest first
+        return (a.totalVotes || 0) - (b.totalVotes || 0);
+      });
+      break;
+      
+    case 'start-date':
+      polls.sort((a, b) => {
+        // Sort by start date (publishDate), soonest first
+        return this.getDateObject(a.publishDate).getTime() - this.getDateObject(b.publishDate).getTime();
+      });
+      break;
+      
+    case 'end-date':
+      polls.sort((a, b) => {
+        // Sort by end date (expiresAt), soonest first
+        return this.getDateObject(a.expiresAt).getTime() - this.getDateObject(b.expiresAt).getTime();
+      });
+      break;
+  }
+}
+
 }
